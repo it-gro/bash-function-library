@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of functions related to Lorem
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::lorem().
 #------------------------------------------------------------------------------
@@ -52,35 +60,34 @@
 #   bfl::lorem 3 virgil
 #------------------------------------------------------------------------------
 bfl::lorem() {
-  # Verify argument count.
-  bfl::verify_arg_count "$#" 0 2 || exit 1
-
-  # Verify dependencies.
-  bfl::verify_dependencies "shuf"
-
-  # Declare positional arguments (readonly, sorted by position).
-  declare -r paragraphs="${1:-1}"
-  declare -r resource="${2:-muir}"
+  # Verify arguments count.
+  (( $#>=0 && $#<= 2 )) || bfl::die "arguments count $# ∉ [0..2]." ${BFL_ErrCode_Not_verified_args_count}
 
   # Verify argument values.
-  bfl::is_positive_integer "${paragraphs}" ||
-    bfl::die "The paragraph count must be a positive integer."
+  local -r paragraphs="${1:-1}"
+  bfl::is_positive_integer "${paragraphs}" || bfl::die "'$1' expected to be a positive integer."
 
-  # Declare return value.
-  declare text
+  local -r resource="${2:-muir}"
+
+  # Verify dependencies.
+  [[ ${_BFL_HAS_SED}  -eq 1 ]] || bfl::die "dependency 'sed' not found"  ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_AWK}  -eq 1 ]] || bfl::die "dependency 'awk' not found"  ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_SHUF} -eq 1 ]] || bfl::die "dependency 'shuf' not found" ${BFL_ErrCode_Not_verified_dependency}
+
+  # Declare positional arguments (readonly, sorted by position).
 
   # Declare all other variables (sorted by name).
-  declare first_paragraph_number
-  declare last_paragraph_number
-  declare maximum_first_paragraph_number
-  declare msg
-  declare resource_directory
-  declare resource_file
-  declare resource_paragraph_count
+  local first_paragraph_number
+  local last_paragraph_number
+  local maximum_first_paragraph_number
+  local msg
+  local resource_directory
+  local resource_file
+  local resource_paragraph_count
 
   # Set the resource directory path.
   resource_directory=$(dirname "${BASH_FUNCTION_LIBRARY}")/resources/lorem ||
-    bfl::die "Unable to determine resource directory."
+    bfl::die "Unable to determine resource directory." $?
 
   # Select the resource file from which to extract paragraphs.
   case "${resource}" in
@@ -109,7 +116,7 @@ bfl::lorem() {
 
   # Determine number of paragraphs in the resource file (assumes one per line).
   resource_paragraph_count=$(wc -l < "${resource_file}") ||
-    bfl::die "Unable to determine number of paragraphs in source file."
+    bfl::die "Unable to determine number of paragraphs in source file." $?
 
   # Make sure number of requested paragraphs does not exceed maximum.
   if [[ "${paragraphs}" -gt "${resource_paragraph_count}" ]]; then
@@ -127,16 +134,19 @@ EOT
 
   # Determine the range of paragraphs to extract.
   first_paragraph_number=$(shuf -i 1-"${maximum_first_paragraph_number}" -n 1) ||
-    bfl::die "Unable to generate random paragraph number."
+    bfl::die "Unable to generate random paragraph number." $?
   last_paragraph_number=$((first_paragraph_number + paragraphs - 1))
+
+  # Declare return value.
+  local text
 
   # Extract sequential paragraphs.
   text=$(sed -n "${first_paragraph_number}","${last_paragraph_number}"p "${resource_file}") ||
-    bfl::die "Unable to extract paragraphs."
+    bfl::die "Unable to extract paragraphs." $?
   # Add a blank line between each paragraph to create proper markdown.
   text=$(awk '{print $0"\n"}' <<< "${text}") ||
-    bfl::die "Unable to add additional newline to each paragraph."
+    bfl::die "Unable to add additional newline to each paragraph." $?
 
   # Print the return value.
   printf "%s" "${text}"
-}
+  }

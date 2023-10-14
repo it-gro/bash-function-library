@@ -27,7 +27,7 @@ Example:  $(basename "$0") "Fred" "George" # TODO
 EOT
   )
   printf "%s\\n" "${msg}"
-}
+  }
 
 #------------------------------------------------------------------------------
 # @function
@@ -38,7 +38,7 @@ EOT
 cleanup() {
   # TODO
   :
-}
+  }
 
 #------------------------------------------------------------------------------
 # @function
@@ -54,32 +54,34 @@ cleanup() {
 # shellcheck disable=1090
 #------------------------------------------------------------------------------
 main() {
+  # Verify argument count.
+  [[ $# -eq 2 ]] || { usage; exit 1; }
+  # bfl::verify_arg_count "$#" 2 2 || bfl::die "arguments count $# ≠ 2." ${BFL_ErrCode_Not_verified_args_count}
+
+  # Display usage message if requested.
+# [[ "$#" -gt 0 && 
+  [[               ("$1" = "-h" || "$1" = "--help") ]] && { usage; exit 0; }
+
   # Source the Bash Function Library.
   if ! source "${BASH_FUNCTION_LIBRARY}"; then
     printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
     exit 1
   fi
 
-  # Display usage message if requested.
-  [[ "$#" -gt 0 && ("$1" = "-h" || "$1" = "--help") ]] && { usage; exit 0; }
-
-  # Verify argument count.
-  bfl::verify_arg_count "$#" 2 2 || { usage; exit 1; } # TODO
-
-  # Verify dependencies.
-  bfl::verify_dependencies "printf" # TODO
+  # Verify dependencies.     # TODO
+  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || bfl::die "dependency 'printf' not found" ${BFL_ErrCode_Not_verified_dependency}
 
   # Declare positional arguments (readonly, sorted by position).
-  declare -r foo="$1" # TODO
-  declare -r bar="$2" # TODO
+  local -r foo="$1" # TODO
+  local -r bar="$2" # TODO
 
   # Declare readonly variables (sorted by name).
-  declare -r wibble="Harry" # TODO
-  declare -r wobble="Ron" # TODO
+  local -r wibble="Harry" # TODO
+  local -r wobble="Ron" # TODO
 
   # Declare all other variables (sorted by name).
-  declare eggs="Dean" # TODO
-  declare ham="Seamus" # TODO
+  local eggs="Dean" # TODO
+  local ham="Seamus" # TODO
 
   # Verify argument values.
   bfl::is_empty "${foo}" && bfl::die "Foo is required." # TODO
@@ -87,7 +89,7 @@ main() {
 
   # TODO
   printf "%s\\n" "${foo}, ${bar}, ${wibble}, ${wobble}, ${eggs}, and ${ham}."
-}
+  }
 
 set -euo pipefail
 trap cleanup EXIT

@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of internal library functions
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::verify_arg_count().
 #------------------------------------------------------------------------------
@@ -26,43 +34,32 @@
 #
 # @example
 #   bfl::verify_arg_count "$#" 2 3
-#
-# shellcheck disable=SC2154
 #------------------------------------------------------------------------------
 bfl::verify_arg_count() {
   # Verify argument count.
-  if [[ "$#" -ne "3" ]]; then
-    bfl::die "Invalid number of arguments. Expected 3, received $#."
-  fi
-  declare -r actual_arg_count="$1"
-  declare -r expected_arg_count_min="$2"
-  declare -r expected_arg_count_max="$3"
-  declare -r regex="^[0-9]+$"
-  declare error_msg
+  [[ "$#" -ne "3" ]] && bfl::die "arguments count $# ≠ 3." ${BFL_ErrCode_Not_verified_args_count}
 
-  # Make sure all of the arguments are integers.
-  if ! [[ "${actual_arg_count}" =~ ${regex} ]] ; then
-    bfl::die "\"${actual_arg_count}\" is not an integer."
-  fi
-  if ! [[ "${expected_arg_count_min}" =~ ${regex} ]] ; then
-    bfl::die "\"${expected_arg_count_min}\" is not an integer."
-  fi
-  if ! [[ "${expected_arg_count_max}" =~ ${regex} ]] ; then
-    bfl::die "\"${expected_arg_count_max}\" is not an integer."
-  fi
+  # Verify arguments' values. Make sure all of the arguments are integers.
+  bfl::is_positive_integer "$1" || bfl::die "'$1' expected to be an integer." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_positive_integer "$2" || bfl::die "'$2' expected to be an integer." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_positive_integer "$3" || bfl::die "'$3' expected to be an integer." ${BFL_ErrCode_Not_verified_arg_values}
+
+  local -r arg_count="$1"
+  local -r expected_min="$2"
+  local -r expected_max="$3"
 
   # Test.
-  if [[ "${actual_arg_count}" -lt "${expected_arg_count_min}" || \
-        "${actual_arg_count}" -gt "${expected_arg_count_max}" ]]; then
-    if [[ "${expected_arg_count_min}" -eq "${expected_arg_count_max}" ]]; then
-      error_msg="Invalid number of arguments. Expected "
-      error_msg+="${expected_arg_count_min}, received ${actual_arg_count}."
-    else
-      error_msg="Invalid number of arguments. Expected between "
-      error_msg+="${expected_arg_count_min} and ${expected_arg_count_max}, "
-      error_msg+="received ${actual_arg_count}."
-    fi
-    printf "%b\\n" "${bfl_aes_red}Error. ${error_msg}${bfl_aes_reset}" 1>&2
-    return 1
+  if [[ "${arg_count}" -lt "${expected_min}" || \
+        "${arg_count}" -gt "${expected_max}" ]]; then
+      if [[ ${BASH_INTERACTIVE} == true ]]; then
+          local error_msg
+          if [[ "${expected_min}" -eq "${expected_max}" ]]; then
+              error_msg=" Expected ${expected_min}, received ${arg_count}."
+          else
+              error_msg="Expected between ${expected_min} and ${expected_max}, received ${arg_count}."
+          fi
+          printf "%b\\n" "${bfl_aes_red}Invalid number of arguments. ${error_msg}${bfl_aes_reset}" 1>&2
+      fi
+      return 1
   fi
-}
+  }

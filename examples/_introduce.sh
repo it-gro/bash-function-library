@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of functions related to examples
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::introduce().
 #------------------------------------------------------------------------------
@@ -137,35 +145,30 @@
 #------------------------------------------------------------------------------
 bfl::introduce() {
   # Verify argument count.
-  bfl::verify_arg_count "$#" 2 2 || exit 1
+  [[ $# -eq 2 ]] || bfl::die "arguments count $# ≠ 2." ${BFL_ErrCode_Not_verified_args_count}
+
+  # Verify argument values.
+  bfl::is_blank "$1" && bfl::die "Name is required." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_positive_integer "$2" || bfl::die "'$2' expected to be a positive integer." ${BFL_ErrCode_Not_verified_arg_values}
 
   # Verify dependencies.
-  bfl::verify_dependencies "printf"
+  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || bfl::die "dependency 'printf' not found"  ${BFL_ErrCode_Not_verified_dependency}
 
   # Declare positional arguments (readonly, sorted by position).
-  declare -r name="$1"
-  declare -r age="$2"
-
-  # Declare return value.
-  declare introduction
+  local -r name="$1"
+  local -r age="$2"
 
   # Declare readonly variables (sorted by name).
-  declare -r const1="My name is"
-  declare -r const2="I am"
-  declare -r const3="years old"
+  local -r const1="My name is"
+  local -r const2="I am"
+  local -r const3="years old"
 
   # Declare all other variables (sorted by name).
   :
 
-  # Verify argument values.
-  bfl::is_empty "${name}" &&
-    bfl::die "Name is required."
-  bfl::is_positive_integer "${age}" ||
-    bfl::die "Expected positive integer, received ${age}."
-
   # Build the return value.
-  introduction="${const1} ${name}. ${const2} ${age} ${const3}."
+  local introduction="${const1} ${name}. ${const2} ${age} ${const3}."
 
   # Print the return value.
   printf "%s\\n" "${introduction}"
-}
+  }

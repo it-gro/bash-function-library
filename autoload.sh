@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Bash functions library loader
+#
+# @author  Joe Mooring
+#
 # @file
 # Sources files adjacent to (in the same directory as) this script.
 #
@@ -57,8 +63,28 @@
 #     exit 1
 #   fi
 #
-# shellcheck disable=SC1090
+# shellcheck disable=SC1091
+# shellcheck disable=SC2034
 #------------------------------------------------------------------------------
+
+# protect from reloading twice
+[[ "${BASH_SOURCE%/*}" =~ /bash_functions_library$ ]] &&
+  _bfl_temporary_var="_GUARD_BFL_$(echo "${BASH_SOURCE##*/}" | sed 's/\.sh$//' | tr [:lower:] [:upper:])" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
+
+source "${BASH_SOURCE%/*}"/lib/procedures/_die.sh
+
+# Confirm we have BASH greater than v4
+[[ -z "${BASH_VERSINFO+x}" ]] || [[ "${BASH_VERSINFO:-0}" -ge 4 ]] ||
+    bfl::die "ERROR: BASH_VERSINFO is '${BASH_VERSINFO:-0}'.  This script requires BASH v4 or greater."
+#  { printf "%s\n" "ERROR: BASH_VERSINFO is '${BASH_VERSINFO:-0}'.  This script requires BASH v4 or greater."; exit 1; }
+
+# some global variables
+source "${BASH_SOURCE%/*}"/consts
+
+#set -uo pipefail
+set +u # The only checking I can switch on
+set -o functrace -o pipefail # -eE - моментальный вылет, ничего не успев записать
 
 #------------------------------------------------------------------------------
 # @function
@@ -67,16 +93,58 @@
 # This will only source file names that begin with an underscore.
 #------------------------------------------------------------------------------
 bfl::autoload() {
-  declare autoload_canonical_path   # Canonical path to this file.
-  declare autoload_directory         # Directory in which this file resides.
-  declare file
 
-  autoload_canonical_path=$(readlink -e "${BASH_SOURCE[0]}") || exit 1
-  autoload_directory=$(dirname "${autoload_canonical_path}") || exit 1
+  function _bfl_parse_params() {
+      local param
+      while [[ $# -gt 0 ]]; do
+          param="$1"
+          shift
+          case $param in          # https://github.com/ralish/bash-script-template/script.sh
+              -h | --h | --help)        cat << EOF
+Usage:
+     -h | --h | --help            Displays this help
+     -q | --quiet                 Displays no extra output
+    -nc | --nc | --no-colour      Disables colour output
+    -cr | --cr | --cron           Run silently unless we encounter an error
+EOF
+                                        return 0 ;;
+             -q  | --quiet)             declare -g BASH_INTERACTIVE=false ;;
+             -nc | --nc | --no-colour)  declare -g BASH_COLOURED=false ;;
+             -cr | --cr | --cron)       cron=true ;;
+              *)  script_exit "Invalid parameter was provided: $param" 1 ;;
+          esac
+      done
+  }
 
-  for file in "${autoload_directory}"/_*; do
-    source "${file}" || exit 1
+  local autoload_canonical_path   # Canonical path to this file.
+  local autoload_directory        # Directory in which this file resides.
+  autoload_canonical_path=$(readlink -e "${BASH_SOURCE[0]}") || bfl::die "readlink -e ${BASH_SOURCE[0]}"
+  autoload_directory=$(dirname "${autoload_canonical_path}") || bfl::die "dirname ${autoload_canonical_path}"
+
+  local file        # source functions
+  for file in "${autoload_directory}"/lib/*/_*.sh; do
+# shellcheck disable=SC1090
+    source "${file}" || bfl::die "source '${file}'"
   done
-}
+  }
 
-bfl::autoload
+# Invoke main with args if not sourced
+# Approach via: https://stackoverflow.com/a/28776166/8787985
+if (return 0 2> /dev/null); then _bfl_temporary_var=true; fi
+if [[ ${_bfl_temporary_var} == true ]]; then
+  bfl::autoload
+else
+  [[ ${BASH_INTERACTIVE} == true ]] && printf "Script not being sourced\n"
+  bfl::autoload "$@"
+fi
+  #                                                                                                 {BASH_SOURCE[*]}  $1 $2 $3 $4 $5 $6 $7 $8 $9
+#  trap 'bfl::trap_cleanup "$?" "${BASH_LINENO[*]}" "$LINENO" "${FUNCNAME[*]}" "$BASH_COMMAND" "$0" "${BASH_SOURCE[0]}" "$*" "${BASH_FUNCTION_LOG}"' EXIT INT TERM SIGINT SIGQUIT SIGTERM ERR
+
+# Enable xtrace if the DEBUG environment variable is set
+[[ "${DEBUG,,}" =~ ^1|yes|true$ ]] && set -o xtrace    # Trace the execution of the script (debug)
+
+# it's better to check dependencies at once, than dynamically check them every time bt bfl::verify_dependencies()
+bfl::global_declare_dependencies 'aws' 'brew' 'cat' 'ccache' 'chmod' 'compgen' 'curl' 'dpkg' 'find' \
+  'getconf' 'git' 'grep' 'head' 'iconv' 'ifconfig' 'javaws' 'jq' 'ldapsearch' 'ldd' 'mkdir' 'mktemp' \
+  'opensnoop' 'openssl' 'pbcopy' 'pbpaste' 'perl' 'proxychains4' 'pwgen' 'python' 'rm' 'rmdir' 'ruby' \
+  'screencapture' 'sed' 'sendmail' 'shuf' 'speedtest-cli' 'sqlite3' 'ssh' 'tail' 'tput' 'uname' 'vcsh'

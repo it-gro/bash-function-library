@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of functions related to manipulations with files
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::get_file_path().
 #------------------------------------------------------------------------------
@@ -19,24 +27,18 @@
 #   bfl::get_file_path "./foo/bar.text"
 #------------------------------------------------------------------------------
 bfl::get_file_path() {
-  bfl::verify_arg_count "$#" 1 1 || exit 1
+  # Verify arguments count.
+  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1" ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -r path="$1"
-  declare canonical_file_path
-
-  if bfl::is_empty "${path}"; then
-    bfl::die "The path was not specified."
-  fi
+  # Verify arguments' values.
+  bfl::is_blank "$1" && bfl::die "The path is required." ${BFL_ErrCode_Not_verified_arg_values}
 
   # Verify that the path exists.
-  if ! canonical_file_path=$(readlink -e "${path}"); then
-    bfl::die "${path} does not exist."
-  fi
+  local canonical_file_path
+  canonical_file_path="$(readlink -e "$1")" || bfl::die "readlink -e '$1'" $?
 
   # Verify that the path points to a file, not a directory.
-  if [[ ! -f "${canonical_file_path}" ]]; then
-    bfl::die "${canonical_file_path} is not a file."
-  fi
+  [[ -f "${canonical_file_path}" ]] || bfl::die "'${canonical_file_path}' is not a file."
 
   printf "%s" "${canonical_file_path}"
-}
+  }

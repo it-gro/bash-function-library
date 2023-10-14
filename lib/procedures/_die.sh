@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of internal library functions
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::die().
 #------------------------------------------------------------------------------
@@ -20,18 +28,18 @@
 # shellcheck disable=SC2154
 #------------------------------------------------------------------------------
 bfl::die() {
-  # Verify argument count.
-  bfl::verify_arg_count "$#" 0 1 || exit 1
-
-  # Declare positional arguments (readonly, sorted by position).
-  declare -r msg="${1:-"Unspecified fatal error."}"
-
-  # Declare all other variables (sorted by name).
-  declare stack
+  # Verify arguments count.
+  (( $#>= 0 && $#<= 2 )) || bfl::die "arguments count $# ∉ [0..2]." ${BFL_ErrCode_Not_verified_args_count}
 
   # Build a string showing the "stack" of functions that got us here.
-  stack="${FUNCNAME[*]}"
+  local stack="${FUNCNAME[*]}"
   stack="${stack// / <- }"
+
+  # Verify argument count.
+  bfl::verify_arg_count "$#" 0 2 || { printf "arguments count %u ∉ [0..2] $stack" $#; exit ${BFL_ErrCode_Not_verified_args_count}; }
+
+  # Declare positional argument (readonly).
+  declare -r msg="${1:-"Unspecified fatal error."}"
 
   # Print the message.
   printf "%b\\n" "${bfl_aes_red}Fatal error. ${msg}${bfl_aes_reset}" 1>&2
@@ -39,5 +47,6 @@ bfl::die() {
   # Print the stack.
   printf "%b\\n" "${bfl_aes_yellow}[${stack}]${bfl_aes_reset}" 1>&2
 
-  exit 1
-}
+  local -i iErr=${2:-1}
+  exit $iErr
+  }

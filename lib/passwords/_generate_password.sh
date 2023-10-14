@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of functions related to password abd cache generating, files encrypting
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::generate_password().
 #------------------------------------------------------------------------------
@@ -31,25 +39,34 @@
 #   bfl::generate_password "16"
 #------------------------------------------------------------------------------
 bfl::generate_password() {
-  bfl::verify_arg_count "$#" 1 1 || exit 1
-  bfl::verify_dependencies "pwgen" "shuf"
+  # Verify arguments count.
+  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -r pswd_length="$1"
-  declare password
-  declare -r min_pswd_length=8
-  declare length_one
-  declare length_two
+  local -r min_pswd_length=8
 
-  bfl::is_positive_integer "${pswd_length}" \
-    || bfl::die "Expected positive integer, received ${pswd_length}."
+  # Verify argument values.
+  bfl::is_positive_integer "$1" \
+      || bfl::die "'${pswd_length}' expected to be positive integer." ${BFL_ErrCode_Not_verified_arg_values}
 
-  if [[ "${pswd_length}" -lt "${min_pswd_length}"  ]]; then
-    bfl::die "Expected integer >= ${min_pswd_length}, received ${pswd_length}."
-  fi
+  [[ "$1" -lt "${min_pswd_length}" ]] \
+    && bfl::die "'${pswd_length}' expected >= '${min_pswd_length}'." ${BFL_ErrCode_Not_verified_arg_values}
 
-  length_one=$(shuf -i 1-$((pswd_length-2)) -n 1) || bfl::die
-  length_two=$((pswd_length-length_one-1)) || bfl::die
-  password=$(pwgen -cns "$length_one" 1)_$(pwgen -cns "$length_two" 1) || bfl::die
+  # Verify dependencies.
+  [[ ${_BFL_HAS_PWGEN} -eq 1 ]] || bfl::die "dependency 'pwgen' not found" ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_SHUF} -eq 1 ]]  || bfl::die "dependency 'shuf' not found"  ${BFL_ErrCode_Not_verified_dependency}
+
+  # Declare positional argument (readonly).
+  local -r pswd_length="$1"
+
+  # Declare all other variables (sorted by name).
+  local length_one
+  local length_two
+  local password
+
+  length_one=$(shuf -i 1-$((pswd_length-2)) -n 1) || bfl::die "shuf -i 1-\$((pswd_length-2)) -n 1"
+  length_two=$((pswd_length-length_one-1)) || bfl::die "((pswd_length-length_one-1))"
+  password=$(pwgen -cns "$length_one" 1)_$(pwgen -cns "$length_two" 1) \
+      || bfl::die "pwgen -cns '\$length_one' 1)_\$(pwgen -cns '$length_two' 1"
 
   printf "%s" "${password}"
-}
+  }

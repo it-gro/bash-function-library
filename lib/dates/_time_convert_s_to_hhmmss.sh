@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of date/time functions
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::time_convert_s_to_hhmmss().
 #------------------------------------------------------------------------------
@@ -19,19 +27,18 @@
 #   bfl::time_convert_s_to_hhmmss "3661"
 #------------------------------------------------------------------------------
 bfl::time_convert_s_to_hhmmss() {
-  bfl::verify_arg_count "$#" 1 1 || exit 1
+  # Verify arguments count.
+  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1" ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -r seconds="$1"
-  declare hhmmss
+  # Verify arguments' values.
+  bfl::is_positive_integer "$1" \
+      || bfl::die "'$1' expected to be a positive integer." ${BFL_ErrCode_Not_verified_arg_values}
 
-  bfl::is_positive_integer "${seconds}" \
-    || bfl::die "Expected positive integer, received ${seconds}."
-
+  local -r seconds="$1"
+  local hhmmss
   hhmmss=$(printf '%02d:%02d:%02d\n' \
-    $((seconds/3600)) \
-    $((seconds%3600/60)) \
-    $((seconds%60))) \
-    || bfl::die "Unable to convert ${seconds} to hh:mm:ss format."
+      $((seconds/3600)) $((seconds%3600/60)) $((seconds%60))) \
+      || bfl::die "Unable to convert '${seconds}' to hh:mm:ss format."
 
   printf "%s" "${hhmmss}"
-}
+  }

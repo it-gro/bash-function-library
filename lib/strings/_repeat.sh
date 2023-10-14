@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ------------- https://github.com/jmooring/bash-function-library -------------
+#
+# Library of functions related to Bash Strings
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::repeat().
 #------------------------------------------------------------------------------
@@ -11,29 +19,31 @@
 #
 # @param string $str
 #   The string to be repeated.
-# @param int $multiplier
+# @param int $n
 #   Number of times the string will be repeated.
 #
-# @return string $str_repeated
+# @return string $Rslt
 #   The repeated string.
 #
 # @example
 #   bfl::repeat "=" "10"
 #------------------------------------------------------------------------------
 bfl::repeat() {
-  bfl::verify_arg_count "$#" 2 2 || exit 1
+  # Verify arguments count.
+  [[ $# -eq 2 ]] || bfl::die "arguments count $# ≠ 2." ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -r str="$1"
-  declare -r multiplier="$2"
-  declare str_repeated
+  # Verify arguments' values.
+  [[ -z "$1" ]] && bfl::die "First argument is empty!" ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_positive_integer "$2" || bfl::die "'$2' expected to be a positive integer." ${BFL_ErrCode_Not_verified_arg_values}
 
-  bfl::is_positive_integer "${multiplier}" \
-    || bfl::die "Expected positive integer, received ${multiplier}."
+  local -r str="$1"
+  local -r n="$2"
+  local Rslt
 
-  # Create a string of spaces that is $multiplier long.
-  str_repeated=$(printf "%${multiplier}s") || bfl::die
+  # Create a string of spaces that is $i long.
+  Rslt=$(printf "%${n}s") || bfl::die "printf '%${n}s'"
   # Replace each space with the $str.
-  str_repeated=${str_repeated// /"${str}"}
+  Rslt=${Rslt// /"${str}"}
 
-  printf "%s" "${str_repeated}"
-}
+  printf "%s" "${Rslt}"
+  }

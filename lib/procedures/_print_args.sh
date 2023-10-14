@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ------------- https://github.com/jmooring/bash-function-library -------------
+#
+# Library of internal library functions
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::print_args().
 #------------------------------------------------------------------------------
@@ -18,16 +26,20 @@
 # bfl::print_args "foo" "bar" "baz"
 #------------------------------------------------------------------------------
 bfl::print_args() {
-  bfl::verify_arg_count "$#" 1 999 || exit 1
+  # Verify arguments count.
+  (( $#>= 1 && $#<= 999 )) || bfl::die "arguments count $# ∉ [1..999]" ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -ar args=("$@")
-  declare counter=0
-  declare arg
+  local -ar args=("$@")
+
+  # Declare all other variables (sorted by name).
+  local arg
+  local -i counter=0
 
   printf "===== Begin output from %s =====\\n" "${FUNCNAME[0]}"
   for arg in "${args[@]}"; do
     ((counter++)) || true
     printf "$%s = %s\\n" "${counter}" "${arg}"
   done
+
   printf "===== End output from %s =====\\n" "${FUNCNAME[0]}"
-}
+  }

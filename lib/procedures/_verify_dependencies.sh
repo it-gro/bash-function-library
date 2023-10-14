@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of internal library functions
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::verify_dependencies().
 #------------------------------------------------------------------------------
@@ -16,14 +24,13 @@
 #   bfl::verify_dependencies "curl" "wget" "git"
 #------------------------------------------------------------------------------
 bfl::verify_dependencies() {
-  bfl::verify_arg_count "$#" 1 999 || exit 1
+  # Verify arguments count.
+  (( $#>= 1 && $#<= 999 )) || bfl::die "arguments count $# ∉ [1..999]." ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -ar apps=("$@")
-  declare app
+  local -ar apps=("$@")
+  local app
 
   for app in "${apps[@]}"; do
-    if ! hash "${app}" 2> /dev/null; then
-       bfl::die "${app} is not installed."
-    fi
+    hash "${app}" 2> /dev/null || bfl::die "${app} is not installed."
   done
-}
+  }

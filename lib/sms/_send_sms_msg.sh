@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ------------- https://github.com/jmooring/bash-function-library -------------
+#
+# Library of functions related to sms
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::send_sms_msg().
 #------------------------------------------------------------------------------
@@ -18,35 +26,33 @@
 #   bfl::send_sms_msg "+12065550100" "Line 1.\\nLine 2."
 #------------------------------------------------------------------------------
 bfl::send_sms_msg() {
-  bfl::verify_arg_count "$#" 2 2 || exit 1
-  bfl::verify_dependencies "aws"
+  # Verify arguments count.
+  [[ $# -eq 2 ]] || bfl::die "arguments count $# ≠ 2." ${BFL_ErrCode_Not_verified_args_count}
+
+  # Verify arguments' values.
+  bfl::is_blank "$1" && bfl::die "The recipient's phone number is required." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_blank "$2" && bfl::die "The message is required." ${BFL_ErrCode_Not_verified_arg_values}
+
+  # Verify dependencies.
+  [[ ${_BFL_HAS_AWS} -eq 1 ]] || bfl::die "dependency 'aws' not found" ${BFL_ErrCode_Not_verified_dependency}
 
   declare -r phone_number="$1"
   declare -r message="$2"
   declare -r phone_number_regex="^\\+[0-9]{6,}$"
-  declare error_msg
-
-   if bfl::is_empty "${phone_number}"; then
-    bfl::die "The recipient's phone number was not specified."
-  fi
-
-  if bfl::is_empty "${message}"; then
-    bfl::die "The message was not specified."
-  fi
 
   # Make sure phone number is properly formatted.
-  if [[ ! "${phone_number}" =~ ${phone_number_regex} ]]; then
-    error_msg="The recipient's phone number is improperly formatted.\\n"
-    error_msg+="Expected a plus sign followed by six or more digits, "
-    error_msg+="received ${phone_number}."
-    bfl::die "${error_msg}"
+  if ! [[ "${phone_number}" =~ ${phone_number_regex} ]]; then
+      local error_msg
+      error_msg="The recipient's phone number is improperly formatted.\\n"
+      error_msg+="Expected a plus sign followed by six or more digits, received ${phone_number}."
+      bfl::die "${error_msg}"
   fi
 
   # Backslash escapes such as \n (newline) in the message string must be
   # interpreted before sending the message.
-  interpreted_message=$(printf "%b" "${message}") || bfl::die
+  interpreted_message=$(printf "%b" "${message}") || bfl::die "printf '%b' ${message}"
 
   # Send the message.
-  aws sns publish --phone-number "${phone_number}" \
-                  --message "${interpreted_message}" || bfl::die
-}
+  aws sns publish --phone-number "${phone_number}" --message "${interpreted_message}" \
+      || bfl::die "aws sns publish --phone-number '${phone_number}' --message '${interpreted_message}'"
+  }

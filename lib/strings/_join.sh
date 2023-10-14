@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ------------- https://github.com/jmooring/bash-function-library -------------
+#
+# Library of functions related to Bash Strings
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::join().
 #------------------------------------------------------------------------------
@@ -17,32 +25,31 @@
 # @param list $pieces
 #   The list of strings to be combined.
 #
-# @return string $joined_string
+# @return string $Rslt
 #   The joined string.
 #
 # @example
 #   bfl::join "," "foo" "bar" "baz"
 #-----------------------------------------------------------------------------
 bfl::join() {
-  bfl::verify_arg_count "$#" 2 999 || exit 1
+  # Verify arguments count.
+  (( $#>= 2 && $#<= 999 )) || bfl::die "arguments count $# ∉ [2..999]" ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -r glue="$1"
-
-  # Delete the first positional parameter.
-  shift
+  local -r glue="$1"
+  shift   # Delete the first positional parameter.
 
   # Create the pieces array from the remaining positional parameters.
-  declare -a pieces=("$@")
-  declare joined_string
+  local -a pieces=("$@")
+  local Rslt=''
 
   while (( "${#pieces[@]}" )); do
-    if [[ "${#pieces[@]}" -eq "1" ]]; then
-      joined_string+=$(printf "%s\\n" "${pieces[0]}") || bfl::die
-    else
-      joined_string+=$(printf "%s%s" "${pieces[0]}" "${glue}") || bfl::die
-    fi
-    pieces=("${pieces[@]:1}")   # Shift the first element off of the array.
+      if [[ "${#pieces[@]}" -eq "1" ]]; then
+          Rslt+=$(printf "%s\\n" "${pieces[0]}") || bfl::die "printf '%s\\n' '${pieces[0]}'"
+      else
+          Rslt+=$(printf "%s%s" "${pieces[0]}" "${glue}") || bfl::die "printf '%s%s' '${pieces[0]}' '${glue}'"
+      fi
+      pieces=("${pieces[@]:1}")   # Shift the first element off of the array.
   done
 
-  printf "%s" "${joined_string}"
-}
+  printf "%s" "$Rslt"
+  }

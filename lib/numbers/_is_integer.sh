@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of number operating functions
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::is_integer().
 #------------------------------------------------------------------------------
@@ -17,12 +25,8 @@
 #------------------------------------------------------------------------------
 #
 bfl::is_integer() {
-  bfl::verify_arg_count "$#" 1 1 || exit 1
+  # Verify arguments count.
+  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -r argument="$1"
-  declare -r regex="^-{0,1}[0-9]+$"
-
-  if ! [[ "${argument}" =~ ${regex} ]] ; then
-    return 1
-  fi
-}
+  [[ "$1" =~ ^-{0,1}[0-9]+$ ]] # || return 1
+  }

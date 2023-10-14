@@ -1,143 +1,154 @@
-# Bash Function Library
+Main / [Usage](#usage) / [Libraries](#libraries) / [Installation](installation.md) / [Description](docs/description.md) / [Coding](docs/coding-standards.md) / [Configuration](#configuration) / [Examples](#examples) / [Tests](#tests) / [Templates](#templates) / [Docs](#documentation) / [ToDo](#todo)
 
-## Table of Contents
+## Bash Function Library (collection of utility functions)
 
-* [Overview](#overview)
-* [Installation](#installation)
-* [Configuration](#configuration)
-* [Examples](#examples)
-* [Templates](#templates)
-* [Documentation](#documentation)
+A collection of BASH utility functions and script templates used to ease the creation of portable and hardened BASH scripts with sane defaults.<br />
+I load these up in my own shell environment.<br />
+If they're useful for anyone else, then great! :)<br />
+If you see some errors or have improvements, you can discuss it within Telegram group Bash_functions_library
 
-## Overview
+#### This project is copied from several bash functions projects with the similar approach.
+#### Sourced git repositories I have got ideas, templates, tests and examples to current project:
+| Author | weblink | comment |
+|:---:|---|:---:|
+| **Joe Mooring** | [https://github.com/jmooring/bash-function-library](https://github.com/jmooring/bash-function-library) | (is **not** POSIX compliant) |
 
-The Bash Function Library is a collection of utility functions. The library is
-not, and was never intended to be, POSIX compliant. Each function is
-namespaced with the `bfl::` prefix. For example, to trim a string:
+### Usage
+
+In short:<br />
+1) clone repository: `git clone git@github.com:AlexeiKharchev/bfl_JMooring "$YOUR_PATH"`<br />
+2) create script to define repository locaton (in order ro source from any script):<br />
+**Contents of my `${HOME}/getConsts` :**
+```bash
+set -o allexport  # == set -a Enable using full option name syntax
+...................... some directory declarations ......................
+readonly BASH_FUNCTION_LIBRARY='/etc/bash_functions_library/autoload.sh'
+.........................................................................
+readonly myPython='python3.8'
+readonly myPerl='5.30.0'
+readonly localPythonModulesDir="/home/alexei/.local/lib/$myPython/site-packages"
+.........................................................................
+set +o allexport  # == set +a Disable using full option name syntax
+```
+3) source ${HOME}/getConsts in /etc/profile (or some autoload script in /etc/profile.d)<br />
+```bash
+source ${HOME}/getConsts
+```
+4) run terminal and type `bfl::string_of_char 'A' 50`<br />
+Your should see `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` in terminal
+5) use `Bash Functions Library` in ypur scripts like this:
+```bash
+# plug in external library
+[[ ${_GUARD_BFL_AUTOLOAD} -eq 1 ]] || { . ${HOME}/getConsts; . "$BASH_FUNCTION_LIBRARY" ; }
+echo "${bfl_aes_green}Loading /etc/profile${bfl_aes_reset}"
+```
+As a result, `getConsts` will be loaded no more than once.<br />
+In order to handle errors there is declaration `trap 'bfl::trap_cleanup ...` in `autoload.sh`,<br />
+so you need not to additionally declare `trap`.<br />
+Log file declared in `autoload.sh`:    `readonly BASH_FUNCTION_LOG="$HOME/.faults"`
+
+### Templates
+
+Use [_library_function.sh](templates/_library_function.sh) for writing new functions.
+
+|                         Library                        |                                          Description                                              |
+|:------------------------------------------------------:|---------------------------------------------------------------------------------------------------|
+| [_library_function.sh](templates/_library_function.sh) | Use to add some new function, in order to make coding simplier and folow unified coding standards |
+| [script](templates/script)                             | Use to create a script which leverages the Bash Function Library                                  |
+
+### Additionally
+
+Basic alerting and setting colors from [JMooring](https://github.com/jmooring/bash-function-library) functions (included in `autoload.sh` by default). Print messages to stdout and to a user specified logfile using the following functions.
 
 ```bash
-bfl::trim "${var}"
+warning "some text"   # Non-critical warnings
+error "some text"     # Prints errors and the function stack but does not stop the script.
+debug "some text"     # Printed only when in verbose (-v) mode
+   ... etc ...
 ```
 
-The calling script must source the entire library; some of the functions depend
-on one or more of the others. Source the entire library by sourcing
-autoload.sh. See the comments in autoload.sh for an explanation of the loading
-process.
+### Libraries
 
-## Installation
+The libraries are located in diectories within `lib/` and contain BASH functions which can be used in your scripts.
+Each included function includes detailed usage information. Read the inline comments within the code for detailed usage instructions.
 
-1\. Clone this repository into `${HOME}/.lib/bfl`.
+|    Library   |      Description     |     |    Library   |  Description   |
+|    :---:     |         :---:        | :-: |     :---:    |      :---:     |
+|   strings    |     Bash Strings     |     |              |                |
+|     file     |                      |     |     mail     |                |
+|   directory  |                      |     |              |                |
+|     date     |                      |     |              |                |
+|   numbers    |         mail         |     |   passwords  |   UUID, etc    |
+|      url     |   url conversation   |     |              |                |
+|   directory  |                      |     |      sms     |                |
+| declaration  | colors, other consts |     |              |                |
+|  procedures  | (for internal using) |     |              |                |
 
-```bash
-git clone https://github.com/jmooring/bash-function-library.git "${HOME}/.lib/bfl"
-```
+#### libraries for specific usage:
 
-2\. Create a permanent environment variable containing the path to the
-autoloader.
+| Debian | Git | Apache | Maven | Lorem | Nexus |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|  |  |  | Apache Maven build tool |  | Sonatype Nexus software repository manager |
 
-```bash
-heredoc=$(cat<<EOT
-# Export path to the autoloader for the Bash Function Library.
-# See https://github.com/jmooring/bash-function-library.
-if [ -f "${HOME}/.lib/bfl/autoload.sh" ]; then
-  export BASH_FUNCTION_LIBRARY="$HOME/.lib/bfl/autoload.sh"
-fi
-EOT
-)
-printf "\\n%s\\n" "${heredoc}" >> "${HOME}/.bashrc"
-```
+### Configuration
 
-3\. Verify that the BASH_FUNCTION_LIBRARY environment variable is correct.
+The following **global variables** must be set for the alert functions to work:
+| var | description | default |
+|:---:|---|:---:|
+| **`$BASH_INTERACTIVE`** | If `false`, prints to log file but not stdout | `true` |
+| **`$DEBUG`** | If `true`, prints `debug` level alerts to stdout | `false` |
+| **`$DRYRUN`** | If `true` does not eval commands passed to `_execute_` function | `false` |
+| **`$BASH_COLOURED`** | Disable coloured output. If `false`, command `tput` also needs var `$TERM` | `true` |
+| **`$LOGFILE`** | Path to a log file | `"$HOME/.faults"` |
+| **`$LOGLEVEL`** | One of: `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `ALL`, `OFF` | `ERROR` |
 
-```bash
-source "${HOME}/.bashrc"
-printf "%s\\n" "${BASH_FUNCTION_LIBRARY}"
-```
+Temporary variables in scripts:
+| var | description |
+|:---:|---|
+| **`$SPIN_NUM`** | Used in `_terminal_spinner.sh` |
+| **`$PROGRESS_BAR_PROGRESS`** | Used in `_terminal_progressbar.sh` |
 
-4\. Test using the `bfl::repeat` library function.
+### The main script `autoload.sh` is roughly split into three sections:
+#### I. TOP: Description, options and global variables:
+These default options are included in the templates and used throughout the utility functions. CLI flags to set/unset them are:
+- **`-h, --h, --help`**: Prints the contents of the `_usage_` function. Edit the text in that function to provide help
+- **`--logfile [FILE]`** Full PATH to logfile. (Default is `${HOME}/logs/$(basename "$0").log`)
+- **`loglevel [LEVEL]`**: Log level of the script. One of: `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `ALL`, `OFF` (Default is '`ERROR`')
+- **`-n, --dryrun`**: Dryrun, sets `$DRYRUN` to `true` allowing you to write functions that will work non-destructively using the `_execute_` function
+- **`-q, --q, --quiet`**: Runs in quiet mode, suppressing all output to stdout. Will still write to log files
+- **`-v, --verbose`**: Sets `$VERBOSE` to `true` and prints all debug messages to stdout
+- **`--force`**: If using the `bfl::wait_confirmation` utility function, this skips all user interaction. Implied `Yes` to all confirmations.
+#### II. MIDDLE:
+- **function `bfl::parseOptions`** You can add custom script options and flags to this function.
+#### III. BOTTOM:
+- **Script initialization** `bfl::autoload` is at the bottom of the `autoload.sh`. Uncomment or change the settings before `bfl::autoload` for your needs.
+Write the main logic of your script within the `_mainScript_` function. It is placed at the bottom of the file for easy access and editing.It is invoked at the end of the script after options are parsed and functions are sourced.
 
-```bash
-if source "${BASH_FUNCTION_LIBRARY}"; then
-  printf "%s\\n" "$(bfl::repeat "=" "40")"
-else
-  printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
-fi
-```
+### Examples
 
-## Configuration
+|                       Example                     |                                              Description                                              |
+|:-------------------------------------------------:|-------------------------------------------------------------------------------------------------------|
+| [examples/\_introduce.sh](examples/_introduce.sh) | This library function is simple and heavily&mdash; documented tutorial                                |
+| [examples/session-info](examples/session-info)    | This script leverages the Bash Function Library, displaying a banner with user and system information |
 
-### Color Output
+### Tests
 
-Library functions such as `bfl::die` and `bfl::warn` produce color output via
-ANSI escape sequences. For example, `bfl::die` prints error messages in red,
-while `bfl::warn` prints warning messages in yellow.
+[JMooring](https://github.com/jmooring/bash-function-library) uses not so flexible as [BATS](https://github.com/sstephenson/bats), but is smart and tiny.
 
-Instead of hardcoding ANSI escape sequences to produce color output, the
-`bfl::declare_ansi_escape_sequences` library function defines global variables
-for common color and formatting cases. This function is called when the Bash
-Function Library is initially sourced.
+### Documentation
 
-The documentation contains a [complete
-list](docs/function-list.md#bfl_declare_ansi_escape_sequences) of the defined
-ANSI escape sequence variables.
+|                       Docs                      |                Description                |
+|:-----------------------------------------------:|-------------------------------------------|
+| [coding-standards.md](docs/coding-standards.md) | Coding standards                          |
+| [function-list.md](docs/function-list.md)       | Summary of library functions              |
+| [error-handling.md](docs/error-handling.md)     | Notes on error handling                   |
+| [functions-list.md](docs/functions-list.md)     | Is not updated yet                        |
 
-Each of the following examples prints the word "foo" in yellow:
+### License
 
-```bash
-echo -e "${bfl_aes_yellow}foo${bfl_aes_reset}"
-printf "${bfl_aes_yellow}%s${bfl_aes_reset}\\n" "foo"
-printf "%b\\n" "${bfl_aes_yellow}foo${bfl_aes_reset}"
-```
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-In some cases it may be desirable to disable color output. For example, let's
-say you've written a script leveraging this library. When you run the script in
-a terminal, you'd like to see the error messages in color. However, when run as
-a cron job, you don't want to see the ANSI escape sequences surrounding error
-messages when viewing logs or emails sent by cron.
+### ToDo
 
-To disable color output, set the BASH_FUNCTION_LIBRARY_COLOR_OUTPUT environment
-variable to "disabled" before sourcing the autoloader. For example:
-
-```bash
-export BASH_FUNCTION_LIBRARY_COLOR_OUTPUT=disabled
-if ! source "${BASH_FUNCTION_LIBRARY}"; then
-  printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
-  exit 1
-fi
-```
-
-## Examples
-
-[examples/\_introduce.sh](examples/_introduce.sh)
-
-> This library function is simple and heavily documented&mdash;a tutorial.
-
-[examples/session-info](examples/session-info)
-
-> This script leverages the Bash Function Library, displaying a banner with
-user and system information.
-
-## Templates
-
-[templates/_library_function.sh](templates/_library_function.sh)
-
-> Use this template to create a new library function.
-
-[templates/script](templates/script)
-
-> Use this template to create a script which leverages the Bash Function
-Library.
-
-## Documentation
-
-[docs/function-list.md](docs/function-list.md)
-
-> Summary of library functions.
-
-[docs/error-handling.md](docs/error-handling.md)
-
-> Notes on error handling.
-
-[docs/coding-standards.md](docs/coding-standards.md)
-
-> Coding standards.
+* make function script for build help about all functions
+* combine and [JMooring testing system](https://github.com/jmooring/bash-function-library/blob/master/test/test) and [Bash Automated Testing System (BATS)](https://github.com/sstephenson/bats)

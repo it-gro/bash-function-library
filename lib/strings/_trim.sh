@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ------------- https://github.com/jmooring/bash-function-library -------------
+#
+# Library of functions related to Bash Strings
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::trim().
 #------------------------------------------------------------------------------
@@ -15,17 +23,15 @@
 # @param string $str
 #   The string to be trimmed.
 #
-# @return string $str_trimmed
+# @return string $Rslt
 #   The trimmed string.
 #
 # @example
 #   bfl::trim " foo "
 #------------------------------------------------------------------------------
 bfl::trim() {
-  bfl::verify_arg_count "$#" 1 1 || exit 1
-
-  declare -r str="$1"
-  declare str_trimmed
+  # Verify arguments count.
+  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
 
   # Explanation of sed commands:
   # - Remove leading whitespace from every line: s/^[[:space:]]+//
@@ -34,9 +40,9 @@ bfl::trim() {
   #
   # See https://tinyurl.com/yav7zw9k and https://tinyurl.com/3z8eh
 
-  str_trimmed=$(printf "%b" "${str}" | \
-    sed -E 's/^[[:space:]]+// ; s/[[:space:]]+$// ; /./,$ !d') \
-    || bfl::die "Unable to trim whitespace."
+  local Rslt
+  Rslt=$(printf "%b" "$1" | sed -E 's/^[[:space:]]+// ; s/[[:space:]]+$// ; /./,$ !d') \
+      || bfl::die "Unable to trim whitespace."
 
-  printf "%s" "${str_trimmed}"
-}
+  printf "%s" "${Rslt}"
+  }

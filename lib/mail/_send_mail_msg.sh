@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
+# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#
+# Library of email functions
+#
+# @author  Joe Mooring
+#
 # @file
 # Defines function: bfl::send_mail_msg().
 #------------------------------------------------------------------------------
@@ -34,34 +42,23 @@
 #   bfl::send_mail_msg "a@b.com" "x@y.com" "x@y.com" "Test" "Line 1.\\nLine 2."
 #------------------------------------------------------------------------------
 bfl::send_mail_msg() {
-  bfl::verify_arg_count "$#" 5 5 || exit 1
-  bfl::verify_dependencies "sendmail"
+  # Verify arguments count.
+  [[ $# -eq 5 ]] || bfl::die "arguments count $# ≠ 5" ${BFL_ErrCode_Not_verified_args_count}
 
-  declare -r to="$1"
-  declare -r from="$2"
-  declare -r envelope_from="$3"
-  declare -r subject="$4"
-  declare -r body="$5"
-  declare message
+  # Verify arguments
+  bfl::is_blank "$1" && bfl::die "The message recipient is required."
+  bfl::is_blank "$2" && bfl::die "The message sender is required."
+  bfl::is_blank "$3" && bfl::die "The envelope sender address is required."
+  bfl::is_blank "$4" && bfl::die "The message subject is required."
+  bfl::is_blank "$5" && bfl::die "The message body is required."
 
-  bfl::is_empty "${to}" \
-    && bfl::die "The message recipient was not specified."
-  bfl::is_empty "${from}" \
-    && bfl::die "The message sender was not specified."
-  bfl::is_empty "${envelope_from}" \
-    && bfl::die "The envelope sender address was not specified."
-  bfl::is_empty "${subject}" \
-    && bfl::die "The message subject was not specified."
-  bfl::is_empty "${body}" \
-    && bfl::die "The message body was not specified."
+  # Verify dependencies.
+  [[ ${_BFL_HAS_SENDMAIL} -eq 1 ]] || bfl::die "dependency 'sendmail' not found." ${BFL_ErrCode_Not_verified_dependency}
 
-  # Format the message.
-  message=$(printf "To: %s\\nFrom: %s\\nSubject: %s\\n\\n%b" \
-    "${to}" \
-    "${from}" \
-    "${subject}" \
-    "${body}") || bfl::die
+  local message # Format the message.                       to  from subject body
+  message=$(printf "To: %s\\nFrom: %s\\nSubject: %s\\n\\n%b" "$1" "$2"   "$4"  "$5") \
+    || bfl::die "printf mail body" $?
 
-  # Send the message.
-  echo "$message" | sendmail -f "$envelope_from" "$to" || bfl::die
-}
+  # Send the message   envelope_from  to
+  echo "$message" | sendmail -f "$3" "$1" || bfl::die "cannot send mail from '$3' to '$1'." $?
+  }
