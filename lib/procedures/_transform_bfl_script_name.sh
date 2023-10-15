@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+[[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && \
+  _bfl_temporary_var="_GUARD_BFL_$(echo "${BASH_SOURCE##*/}" | sed 's/\.sh$//' | tr [:lower:] [:upper:])" || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
 # --------- https://github.com/AlexeiKharchev/bash_functions_library ----------
 #

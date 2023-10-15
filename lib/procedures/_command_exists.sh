@@ -3,37 +3,37 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+#----------- https://github.com/natelandau/shell-scripting-templates ----------
 #
 # Library of internal library functions
 #
-# @author  Joe Mooring
+# @author  Nathaniel Landau
 #
 # @file
-# Defines function: bfl::error().
+# Defines function: bfl::command_exists().
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # @function
-# Prints an error message to stderr.
+#   Checks if a binary exists in the search PATH.
 #
-# The message provided will be prepended with "Error. "
+# @param String $cmd_name
+#   Name of the binary to check for existence.
 #
-# @param string $msg (optional)
-#   The message.
+# @return boolean $result
+#     0 / 1   ( true / false )
 #
 # @example
-#   bfl::error "The foo is bar."
-#
-# shellcheck disable=SC2154
+#   (bfl::command_exists ffmpeg ) && [SUCCESS] || [FAILURE]
 #------------------------------------------------------------------------------
-bfl::error() {
+bfl::command_exists() {
   # Verify arguments count.
-  (( $#>= 0 && $#<= 1 )) || bfl::die "arguments count $# ∉ [0..1]." ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
 
-  # Declare positional argument (readonly).
-  declare msg="${1:-"Unspecified error."}"
+  if command -v "$1" >/dev/null 2>&1; then
+      return 0
+  fi
 
-  # Print the message.
-  printf "%b\\n" "${bfl_aes_red}Error. ${msg}${bfl_aes_reset}" 1>&2
+  #bfl::writelog_debug "Did not find command: '$1'"
+  return 1
   }

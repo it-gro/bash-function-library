@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
 # ----------- https://github.com/jmooring/bash-function-library.git -----------
@@ -34,9 +34,6 @@ bfl::die() {
   # Build a string showing the "stack" of functions that got us here.
   local stack="${FUNCNAME[*]}"
   stack="${stack// / <- }"
-
-  # Verify argument count.
-  bfl::verify_arg_count "$#" 0 2 || { printf "arguments count %u ∉ [0..2] $stack" $#; exit ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Declare positional argument (readonly).
   declare -r msg="${1:-"Unspecified fatal error."}"

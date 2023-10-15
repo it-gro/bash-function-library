@@ -67,17 +67,18 @@
 # shellcheck disable=SC2034
 #------------------------------------------------------------------------------
 
+# each script header depends on $BASH_FUNCTIONS_LIBRARY, so it is neccesary
+[[ "${BASH_SOURCE}" = "${BASH_FUNCTIONS_LIBRARY}" ]] || return 1
+
 # protect from reloading twice
-[[ "${BASH_SOURCE%/*}" =~ /bash_functions_library$ ]] &&
-  _bfl_temporary_var="_GUARD_BFL_$(echo "${BASH_SOURCE##*/}" | sed 's/\.sh$//' | tr [:lower:] [:upper:])" || return 0
+source "${BASH_SOURCE%/*}"/lib/procedures/_transform_bfl_script_name.sh
+_bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE##*/})"
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 
-source "${BASH_SOURCE%/*}"/lib/procedures/_die.sh
-
 # Confirm we have BASH greater than v4
+source "${BASH_SOURCE%/*}"/lib/procedures/_die.sh
 [[ -z "${BASH_VERSINFO+x}" ]] || [[ "${BASH_VERSINFO:-0}" -ge 4 ]] ||
-    bfl::die "ERROR: BASH_VERSINFO is '${BASH_VERSINFO:-0}'.  This script requires BASH v4 or greater."
-#  { printf "%s\n" "ERROR: BASH_VERSINFO is '${BASH_VERSINFO:-0}'.  This script requires BASH v4 or greater."; exit 1; }
+  bfl::die "Error: BASH_VERSINFO is '${BASH_VERSINFO:-0}'.  This script requires BASH v4 or greater."
 
 # some global variables
 source "${BASH_SOURCE%/*}"/consts
