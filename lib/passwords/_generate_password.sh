@@ -15,7 +15,7 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Generates a random password.
+#   Generates a random password.
 #
 # Password characteristics:
 # - At least one lowercase letter
@@ -29,10 +29,10 @@
 # benign special character (i.e., it won't break quoted strings, doesn't
 # contain escape sequences, etc.).
 #
-# @param int $pswd_length
+# @param Integer $pswd_length
 #   The length of the desired password.
 #
-# @return string $password
+# @return String $password
 #   A random password
 #
 # @example
@@ -40,33 +40,31 @@
 #------------------------------------------------------------------------------
 bfl::generate_password() {
   # Verify arguments count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
-
-  local -r min_pswd_length=8
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify argument values.
-  bfl::is_positive_integer "$1" \
-      || bfl::die "'${pswd_length}' expected to be positive integer." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_positive_integer "$1" ||
+    { bfl::error "'${pswd_length}' expected to be positive integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
-  [[ "$1" -lt "${min_pswd_length}" ]] \
-    && bfl::die "'${pswd_length}' expected >= '${min_pswd_length}'." ${BFL_ErrCode_Not_verified_arg_values}
+  local -r min_pswd_length=8
+  [[ "$1" -lt "${min_pswd_length}" ]] &&
+    { bfl::error "'${pswd_length}' expected >= '${min_pswd_length}'."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_PWGEN} -eq 1 ]] || bfl::die "dependency 'pwgen' not found" ${BFL_ErrCode_Not_verified_dependency}
-  [[ ${_BFL_HAS_SHUF} -eq 1 ]]  || bfl::die "dependency 'shuf' not found"  ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_PWGEN} -eq 1 ]] || { bfl::error "dependency 'pwgen' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  [[ ${_BFL_HAS_SHUF} -eq 1 ]]  || { bfl::error "dependency 'shuf' not found";  return ${BFL_ErrCode_Not_verified_dependency}; }
 
   # Declare positional argument (readonly).
   local -r pswd_length="$1"
 
   # Declare all other variables (sorted by name).
-  local length_one
-  local length_two
-  local password
+  local {length_one,length_two,password}=
 
-  length_one=$(shuf -i 1-$((pswd_length-2)) -n 1) || bfl::die "shuf -i 1-\$((pswd_length-2)) -n 1"
-  length_two=$((pswd_length-length_one-1)) || bfl::die "((pswd_length-length_one-1))"
-  password=$(pwgen -cns "$length_one" 1)_$(pwgen -cns "$length_two" 1) \
-      || bfl::die "pwgen -cns '\$length_one' 1)_\$(pwgen -cns '$length_two' 1"
+  local -i iErr
+  length_one=$(shuf -i 1-$((pswd_length-2)) -n 1) || { iErr=$?; bfl::error "shuf -i 1-\$((pswd_length-2)) -n 1"; return ${iErr}; }
+  length_two=$((pswd_length-length_one-1)) || { iErr=$?; bfl::error "length_two=\$((pswd_length-length_one-1))"; return ${iErr}; }
+  password=$(pwgen -cns "$length_one" 1)_$(pwgen -cns "$length_two" 1) ||
+    { iErr=$?; bfl::error "pwgen -cns '\$length_one' 1)_\$(pwgen -cns '$length_two' 1"; return ${iErr}; }
 
-  printf "%s" "${password}"
+  printf "%s\\n" "${password}"
   }

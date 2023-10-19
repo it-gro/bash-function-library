@@ -15,26 +15,30 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Sends an email message via sendmail.
+#   Sends an email message via sendmail.
 #
-# @param string $to
+# @param String $to
 #   Message recipient or recipients.
 #   Examples:
 #   - foo@example.com
 #   - foo@example.com, bar@example.com
 #   - Foo <foo@example.com>
 #   - Foo <foo@example.com>, Bar <bar@example.com>
-# @param string $from
+#
+# @param String $from
 #   Message sender.
 #   Examples:
 #   - foo@example.
 #   - Foo <foo@example.com>
-# @param string $envelope_from
+#
+# @param String $envelope_from
 #   Envelope sender address.
 #   Example: foo@example.com
-# @param string $subject
+#
+# @param String $subject
 #   Message subject.
-# @param string $body
+#
+# @param String $body
 #   Message body.
 #   Example: "This is line one.\\nThis is line two.\\n"
 #
@@ -43,22 +47,23 @@
 #------------------------------------------------------------------------------
 bfl::send_mail_msg() {
   # Verify arguments count.
-  [[ $# -eq 5 ]] || bfl::die "arguments count $# ≠ 5" ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 5 ]] || { bfl::error "arguments count $# ≠ 5"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify arguments
-  bfl::is_blank "$1" && bfl::die "The message recipient is required."
-  bfl::is_blank "$2" && bfl::die "The message sender is required."
-  bfl::is_blank "$3" && bfl::die "The envelope sender address is required."
-  bfl::is_blank "$4" && bfl::die "The message subject is required."
-  bfl::is_blank "$5" && bfl::die "The message body is required."
+  bfl::is_blank "$1" && { bfl::error "The message recipient is required.";        return ${BFL_ErrCode_Not_verified_arg_values}; }
+  bfl::is_blank "$2" && { bfl::error "The message sender is required.";           return ${BFL_ErrCode_Not_verified_arg_values}; }
+  bfl::is_blank "$3" && { bfl::error "The envelope sender address is required.";  return ${BFL_ErrCode_Not_verified_arg_values}; }
+  bfl::is_blank "$4" && { bfl::error "The message subject is required.";          return ${BFL_ErrCode_Not_verified_arg_values}; }
+  bfl::is_blank "$5" && { bfl::error "The message body is required.";             return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_SENDMAIL} -eq 1 ]] || bfl::die "dependency 'sendmail' not found." ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_SENDMAIL} -eq 1 ]] || { bfl::error "dependency 'sendmail' not found."; return ${BFL_ErrCode_Not_verified_dependency}; }
 
+  local -i iErr
   local message # Format the message.                       to  from subject body
-  message=$(printf "To: %s\\nFrom: %s\\nSubject: %s\\n\\n%b" "$1" "$2"   "$4"  "$5") \
-    || bfl::die "printf mail body" $?
+  message=$(printf "To: %s\\nFrom: %s\\nSubject: %s\\n\\n%b" "$1" "$2"   "$4"  "$5") ||
+    { iErr=$?; bfl::error "printf mail body"; return ${iErr}; }
 
   # Send the message   envelope_from  to
-  echo "$message" | sendmail -f "$3" "$1" || bfl::die "cannot send mail from '$3' to '$1'." $?
+  echo "$message" | sendmail -f "$3" "$1" || { iErr=$?; bfl::error "cannot send mail from '$3' to '$1'."; return ${iErr}; }
   }

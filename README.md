@@ -22,7 +22,7 @@ In short:<br />
 ```bash
 set -o allexport  # == set -a Enable using full option name syntax
 ...................... some directory declarations ......................
-readonly BASH_FUNCTION_LIBRARY='/etc/bash_functions_library/autoload.sh'
+readonly BASH_FUNCTIONS_LIBRARY='/etc/bash_functions_library/autoload.sh'
 .........................................................................
 readonly myPython='python3.8'
 readonly myPerl='5.30.0'
@@ -33,7 +33,7 @@ set +o allexport  # == set +a Disable using full option name syntax
 3) source ${HOME}/getConsts in /etc/profile (or some autoload script in /etc/profile.d)<br />
 ```bash
 # plug in external library
-[[ ${_GUARD_BFL_AUTOLOAD} -eq 1 ]] || { . ${HOME}/getConsts; . "$BASH_FUNCTION_LIBRARY" ; }
+[[ ${_GUARD_BFL_AUTOLOAD} -eq 1 ]] || { . ${HOME}/getConsts || exit 1; . "${BASH_FUNCTIONS_LIBRARY}"; }
 echo "${DarkGreen}Loading /etc/profile${NC}"
 ```
 4) run terminal and type `bfl::string_of_char 'A' 50`<br />
@@ -42,7 +42,7 @@ Your should see `AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` in terminal
 As a result, `getConsts` will be loaded no more than once.<br />
 In order to handle errors there is declaration `trap 'bfl::trap_cleanup ...` in `autoload.sh`,<br />
 so you need not to additionally declare `trap`.<br />
-Log file declared in `autoload.sh`:    `readonly BASH_FUNCTION_LOG="$HOME/.faults"`
+Log file declared in `autoload.sh`:    `readonly BASH_FUNCTIONS_LOG="$HOME/.faults"`
 
 ### Templates
 

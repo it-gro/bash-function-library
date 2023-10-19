@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
+[[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+# ------------- https://github.com/jmooring/bash-function-library -------------
 #
 # Library of functions related to examples
 #
@@ -15,7 +15,7 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Introduces a person given their name and age.
+#   Introduces a person given their name and age.
 #
 # This is a silly example of a function that could be added to the Bash
 # Function Library. Because the filename begins with an underscore, if this
@@ -132,12 +132,13 @@
 #
 #-----
 #
-# @param string $name
+# @param String $name
 #   The person's name.
-# @param int $age
+#
+# @param Integer $age
 #   The person's age.
 #
-# @return string $introduction
+# @return String $introduction
 #   The introduction.
 #
 # @example
@@ -145,14 +146,14 @@
 #------------------------------------------------------------------------------
 bfl::introduce() {
   # Verify argument count.
-  [[ $# -eq 2 ]] || bfl::die "arguments count $# ≠ 2." ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 2 ]] || { bfl::error "arguments count $# ≠ 2."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify argument values.
-  bfl::is_blank "$1" && bfl::die "Name is required." ${BFL_ErrCode_Not_verified_arg_values}
-  bfl::is_positive_integer "$2" || bfl::die "'$2' expected to be a positive integer." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_blank "$1" && { bfl::error "Name is required."; return ${BFL_ErrCode_Not_verified_arg_values}; }
+  bfl::is_positive_integer "$2" || { bfl::error "'$2' expected to be a positive integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || bfl::die "dependency 'printf' not found"  ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || { bfl::error "dependency 'printf' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
 
   # Declare positional arguments (readonly, sorted by position).
   local -r name="$1"

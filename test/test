@@ -6,44 +6,47 @@
 #
 #------------------------------------------------------------------------------
 
+set +u    # подключаем внешнюю "библиотеку"
+[[ ${_GUARD_BFL_AUTOLOAD} -eq 1 ]] || { . /etc/getConsts || exit 1; . "${BASH_FUNCTIONS_LIBRARY}"; }
+
 #------------------------------------------------------------------------------
 # @function
-# Tests a function to see if its return code matches the expected return code.
+#   Tests a function to see if its return code matches the expected return code.
 #
-# @param string $function_to_test
+# @param String $function_to_test
 #   The function to be tested.
-# @param string $args
+#
+# @param String $args
 #   The arguments to pass to the function.
-# @param string $expected_return_code
+#
+# @param String $expected_return_code
 #   The expected return code (0 or 1).
 #
 # shellcheck disable=SC2059
 # shellcheck disable=SC2154
 #------------------------------------------------------------------------------
 assert() {
-  bfl::verify_arg_count "$#" 3 3 || exit 1
+  [[ $# -eq 3 ]] || { bfl::error "arguments count $# ≠ 3"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
-  declare -r function_to_test="$1"
-  declare -r args="$2"
-  declare -r expected_return_code="$3"
-  declare actual_return_code
-  declare cmd
-  declare cmd_output
-  declare format
-  declare result
+  local -r function_to_test="$1"
+  local -r args="$2"
+  local -r expected_return_code="$3"
 
   # Test for empty strings.
-  bfl::is_empty "${function_to_test}"     && bfl::die "\$function_to_test is a an empty string."
-  bfl::is_empty "${expected_return_code}" && bfl::die "\$expected_return_code is a an empty string."
+  bfl::is_blank "${function_to_test}"     && { bfl::error "\$function_to_test is required.";     return 1; }
+  bfl::is_blank "${expected_return_code}" && { bfl::error "\$expected_return_code is required."; return 1; }
+
+  local {cmd,cmd_output,format,result}=
+  local -i iErr
 
   # Run the command. The command is run in a subshell (command substitution);
   # exit calls will terminate the subshell, not this script.
   cmd=$(printf "%s %s" "${function_to_test}" "${args}")
   cmd_output=$(eval "${cmd}" 2>&1)
-  actual_return_code="$?"
+  iErr=$?
 
   # Print results.
-  if [[ "${actual_return_code}" -eq "${expected_return_code}" ]]; then
+  if [[ ${iErr} -eq "${expected_return_code}" ]]; then
       result="PASS"
       format="${bfl_aes_green}%-${cw1}s${bfl_aes_reset} %-${cw2}s %-${cw3}s %-${cw4}s %-${cw5}s %-${cw6}s${bfl_aes_reset} \\n"
   else
@@ -51,12 +54,12 @@ assert() {
       format="${bfl_aes_red}%-${cw1}s${bfl_aes_reset} %-${cw2}s %-${cw3}s %-${cw4}s %-${cw5}s %-${cw6}s${bfl_aes_reset} \\n"
   fi
   cmd_output=${cmd_output//[$'\n']}
-  printf "${format}" "${result}" "${function_to_test:0:${cw2}}" "${args:0:${cw3}}" "${expected_return_code}" "${actual_return_code}" "${cmd_output:0:${cw6}}"
+  printf "${format}" "${result}" "${function_to_test:0:${cw2}}" "${args:0:${cw3}}" "${expected_return_code}" "${iErr}" "${cmd_output:0:${cw6}}"
   }
 
 #------------------------------------------------------------------------------
 # @function
-# Main function.
+#   Main function.
 #
 # @param array global $assertions
 #   Global array created by declare_assertions().
@@ -66,24 +69,22 @@ assert() {
 # shellcheck disable=SC2059
 #------------------------------------------------------------------------------
 main() {
-  if ! source "${BASH_FUNCTION_LIBRARY}"; then
-      printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
-      exit 1
-  fi
-
   # Declare column widths (global constants) for displaying test results.
-  declare -rg cw1=6     # Width of column 1: Result (PASS/FAIL)
-  declare -rg cw2=37    # Width of column 2: Function
-  declare -rg cw3=33    # Width of column 3: Arguments
-  declare -rg cw4=8     # Width of column 4: Expected return code
-  declare -rg cw5=6     # Width of column 5: Actual return code
-  declare -rg cw6=109   # Width of column 6: Command output
+  readonly cw1=6     # Width of column 1: Result (PASS/FAIL)
+  readonly cw2=37    # Width of column 2: Function
+  readonly cw3=33    # Width of column 3: Arguments
+  readonly cw4=8     # Width of column 4: Expected return code
+  readonly cw5=6     # Width of column 5: Actual return code
+  readonly cw6=109   # Width of column 6: Command output
+
+# columns width:   Result Function Arguments  returncode    output
+# readonly cw_arr=(   6      37        33       8     6      109 )
+#                 PASS/FAIL                 Expected Actual
 
   # Declare other local variables.
-  declare assertion
-  declare -r format="%-${cw1}s %-${cw2}s %-${cw3}s %-${cw4}s %-${cw5}s %-${cw6}s"
-  declare line_1 line_2 line_3 line_4 line_5 line_6
-  declare -a pieces
+  local -r format="%-${cw1}s %-${cw2}s %-${cw3}s %-${cw4}s %-${cw5}s %-${cw6}s"
+  local {assertion,line_1,line_2,line_3,line_4,line_5,line_6}=
+  local -a pieces
 
   # Create table header lines for for displaying test results.
   line_1=$(bfl::repeat "=" ${cw1})
@@ -102,13 +103,14 @@ main() {
   printf "${format}\\n" "Result" "Function" "Arguments (truncated)" "Code" "Code" "First line of command output (truncated)"
   printf "%s %s %s %s %s %s\\n" "${line_1}" "${line_2}" "${line_3}" "${line_4}" "${line_5}" "${line_6}"
 
-  #
-  for d in lib/*; do
+  for d in "${BASH_FUNCTIONS_LIBRARY%/*}"/lib/*; do
       d="${d##*/}"
-      if [[ -f test/"$d" ]]; then  #  && ! [[ "$d" = 'test' ]]
-          printf "Testing $d library...\n" > /dev/tty
+      if [[ -f "${BASH_FUNCTIONS_LIBRARY%/*}"/test/"$d" ]]; then  #  && ! [[ "$d" = 'test' ]]
+          printf "\n" 2>&1
+          printf "Testing $d library...\n" 2>&1
+          printf "\n" 2>&1
 
-          source test/"$d"
+          source "${BASH_FUNCTIONS_LIBRARY%/*}"/test/"$d"
           declare_assertions # Declare assertions.
 
           # Run assertion tests.
@@ -124,5 +126,5 @@ main() {
   printf "\\n"
   }
 
-set -euo pipefail
+#set -euo pipefail
 main

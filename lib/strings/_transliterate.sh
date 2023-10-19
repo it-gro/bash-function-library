@@ -15,12 +15,12 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Transliterates a string.
+#   Transliterates a string.
 #
-# @param string $str
+# @param String $str
 #   The string to transliterate.
 #
-# @return string $Rslt
+# @return String $Rslt
 #   The transliterated string.
 #
 # @example
@@ -28,23 +28,25 @@
 #------------------------------------------------------------------------------
 bfl::transliterate() {
   # Verify arguments count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_ICONV} -eq 1 ]]   || bfl::die "dependency 'iconv' not found" ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_ICONV} -eq 1 ]] || { bfl::error "dependency 'iconv' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
 
   # Enable extended pattern matching features.
   shopt -s extglob
 
   # Convert from UTF-8 to ASCII.
   local Rslt
-  Rslt=$(iconv -c -f utf8 -t ascii//TRANSLIT <<< "$1") || bfl::die "iconv -c -f utf8 -t ascii//TRANSLIT <<< '$1'"
-  
+  local -i iErr
+  Rslt=$(iconv -c -f utf8 -t ascii//TRANSLIT <<< "$1") ||
+    { iErr=$?; bfl::error "iconv -c -f utf8 -t ascii//TRANSLIT <<< '$1'"; return ${iErr}; }
+
   Rslt=${Rslt//[^[:alnum:]]/-}  # Replace non-alphanumeric characters with a hyphen.
   Rslt=${Rslt//+(-)/-}          # Replace two or more sequential hyphens with a single hyphen.
   Rslt=${Rslt#-}                # Remove leading hyphen, if any.
   Rslt=${Rslt%-}                # Remove trailing hyphen, if any.
   Rslt=${Rslt,,}                # Convert to lower case
 
-  printf "%s" "${Rslt}"
+  printf "%s\\n" "${Rslt}"
   }

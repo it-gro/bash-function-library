@@ -15,9 +15,9 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Checks if a string is empty ("") or null.
+#   Checks if a string is empty ("") or null.
 #
-# @param string $str
+# @param String $str
 #   The string to check.
 #
 # @example
@@ -25,7 +25,7 @@
 #------------------------------------------------------------------------------
 bfl::is_empty() {
   # Verify argument count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1" ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   [[ -z "$1" ]] # || return 1
   }

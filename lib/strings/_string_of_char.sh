@@ -3,29 +3,30 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
 #
-# Library of number operating functions
+# Library of functions related to Bash Strings
 #
-# @author  Joe Mooring
+# @author
 #
 # @file
-# Defines function: bfl::is_integer().
+# Defines function: bfl::string_of_char().
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # @function
-#   Determines if the argument is an integer.
+#   Synonim bfl::repeat().
 #
-# @param String $value_to_test
-#   The value to be tested.
+# @param String $str
+#   The string to be repeated.
 #
-# @example
-#   bfl::is_integer "8675309"
+# @param Integer $n
+#   Number of times the string will be repeated.
+#
+# @return String $Rslt
+#   The repeated string.
 #------------------------------------------------------------------------------
-bfl::is_integer() {
-  # Verify arguments count.
-  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
-
-  [[ "$1" =~ ^-{0,1}[0-9]+$ ]] # || return 1
+bfl::string_of_char() {
+  local Rslt
+  Rslt=$(bfl::repeat "$@") || return $?
+  printf "%s\\n" "$Rslt"
   }

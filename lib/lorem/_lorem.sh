@@ -3,7 +3,7 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+# ------------- https://github.com/jmooring/bash-function-library -------------
 #
 # Library of functions related to Lorem
 #
@@ -15,7 +15,7 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Randomly extracts one or more sequential paragraphs from a given resource.
+#   Randomly extracts one or more sequential paragraphs from a given resource.
 #
 # The resources are located in the resources/lorem directory. Each resource
 # contains one paragraph per line. The resources were created from books
@@ -29,9 +29,10 @@
 #   5) Captions
 #   6) Any paragraph less than or equal to 200 characters.
 #
-# @param int $paragraphs (optional)
+# @param Integer $paragraphs (optional)
 #   The number of paragraphs to extract (default: 1).
-# @param string $resource (optional)
+#
+# @param String $resource (optional)
 #   The resource from which to extract the paragraphs (default: muir).
 #   Valid resources:
 #   - burroughs (The Breath of Life by John Burroughs)
@@ -41,53 +42,45 @@
 #   - muir (Our National Parks by John Muir)
 #   - virgil (The Aeneid by Virgil)
 #
-# @return string $text
+# @return String $text
 #   The extracted paragraphs.
 #
 # @example
 #   bfl::lorem
-# @example
 #   bfl::lorem 2
-# @example
 #   bfl::lorem 3 burroughs
-# @example
 #   bfl::lorem 3 darwin
-# @example
 #   bfl::lorem 3 mills
-# @example
 #   bfl::lorem 3 muir
-# @example
 #   bfl::lorem 3 virgil
 #------------------------------------------------------------------------------
 bfl::lorem() {
   # Verify arguments count.
-  (( $#>=0 && $#<= 2 )) || bfl::die "arguments count $# ∉ [0..2]." ${BFL_ErrCode_Not_verified_args_count}
+  (( $#>=0 && $#<= 2 )) || { bfl::error "arguments count $# ∉ [0..2]."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify argument values.
   local -r paragraphs="${1:-1}"
-  bfl::is_positive_integer "${paragraphs}" || bfl::die "'$1' expected to be a positive integer."
+  bfl::is_positive_integer "${paragraphs}" ||
+    { bfl::error "'$1' expected to be a positive integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   local -r resource="${2:-muir}"
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_SED}  -eq 1 ]] || bfl::die "dependency 'sed' not found"  ${BFL_ErrCode_Not_verified_dependency}
-  [[ ${_BFL_HAS_AWK}  -eq 1 ]] || bfl::die "dependency 'awk' not found"  ${BFL_ErrCode_Not_verified_dependency}
-  [[ ${_BFL_HAS_SHUF} -eq 1 ]] || bfl::die "dependency 'shuf' not found" ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_SED}  -eq 1 ]] || { bfl::error "dependency 'sed' not found";  return ${BFL_ErrCode_Not_verified_dependency}; }
+  [[ ${_BFL_HAS_AWK}  -eq 1 ]] || { bfl::error "dependency 'awk' not found";  return ${BFL_ErrCode_Not_verified_dependency}; }
+  [[ ${_BFL_HAS_SHUF} -eq 1 ]] || { bfl::error "dependency 'shuf' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
 
   # Declare positional arguments (readonly, sorted by position).
 
   # Declare all other variables (sorted by name).
-  local first_paragraph_number
-  local last_paragraph_number
-  local maximum_first_paragraph_number
-  local msg
-  local resource_directory
-  local resource_file
-  local resource_paragraph_count
+  local -i {first_paragraph_number,last_paragraph_number,maximum_first_paragraph_number,resource_paragraph_count}=0
+  local {msg,resource_directory,resource_file}=
 
+  local -i iErr
   # Set the resource directory path.
-  resource_directory=$(dirname "${BASH_FUNCTION_LIBRARY}")/resources/lorem ||
-    bfl::die "Unable to determine resource directory." $?
+  #                   $(dirname "${BASH_FUNCTIONS_LIBRARY}")
+  resource_directory="${BASH_FUNCTIONS_LIBRARY%/*}"/resources/lorem ||
+    { iErr=$?; bfl::error "Unable to determine resource directory."; return ${iErr}; }
 
   # Select the resource file from which to extract paragraphs.
   case "${resource}" in
@@ -110,13 +103,14 @@ bfl::lorem() {
       resource_file=${resource_directory}/the-aeneid-by-virgil.txt
       ;;
     * )
-      bfl::die "Unknown resource."
+      bfl::error "Unknown resource."
+      return ${BFL_ErrCode_Not_verified_arg_values}
       ;;
   esac
 
   # Determine number of paragraphs in the resource file (assumes one per line).
   resource_paragraph_count=$(wc -l < "${resource_file}") ||
-    bfl::die "Unable to determine number of paragraphs in source file." $?
+    { iErr=$?; bfl::error "Unable to determine number of paragraphs in source file."; return ${iErr}; }
 
   # Make sure number of requested paragraphs does not exceed maximum.
   if [[ "${paragraphs}" -gt "${resource_paragraph_count}" ]]; then
@@ -126,7 +120,8 @@ the number of paragraphs available (${resource_paragraph_count}) in the specifie
 resource (${resource}).
 EOT
     )
-    bfl::die "${msg}"
+    bfl::error "${msg}"
+    return 1
   fi
 
   # Determine the highest paragraph number from which we can begin extraction.
@@ -134,7 +129,7 @@ EOT
 
   # Determine the range of paragraphs to extract.
   first_paragraph_number=$(shuf -i 1-"${maximum_first_paragraph_number}" -n 1) ||
-    bfl::die "Unable to generate random paragraph number." $?
+    { iErr=$?; bfl::error "Unable to generate random paragraph number."; return ${iErr}; }
   last_paragraph_number=$((first_paragraph_number + paragraphs - 1))
 
   # Declare return value.
@@ -142,11 +137,11 @@ EOT
 
   # Extract sequential paragraphs.
   text=$(sed -n "${first_paragraph_number}","${last_paragraph_number}"p "${resource_file}") ||
-    bfl::die "Unable to extract paragraphs." $?
+    { iErr=$?; bfl::error "Unable to extract paragraphs."; return ${iErr}; }
   # Add a blank line between each paragraph to create proper markdown.
   text=$(awk '{print $0"\n"}' <<< "${text}") ||
-    bfl::die "Unable to add additional newline to each paragraph." $?
+    { iErr=$?; bfl::error "Unable to add additional newline to each paragraph."; return ${iErr}; }
 
   # Print the return value.
-  printf "%s" "${text}"
+  printf "%s\\n" "${text}"
   }

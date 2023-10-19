@@ -3,7 +3,7 @@
 [[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+# ------------- https://github.com/jmooring/bash-function-library -------------
 #
 # Library of functions related to manipulations with files
 #
@@ -15,12 +15,12 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Gets the file extension.
+#   Gets the file extension.
 #
-# @param string $path
+# @param String $path
 #   A relative path, absolute path, or symbolic link.
 #
-# @return string $file_extension
+# @return String $file_extension
 #   The file extension, excluding the preceding period.
 #
 # @example
@@ -28,14 +28,26 @@
 #------------------------------------------------------------------------------
 bfl::get_file_extension() {
   # Verify arguments count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify arguments' values.
-  bfl::is_blank "$1" && bfl::die "The path is required." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_blank "$1" && { bfl::error "The path is required."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
-  local file_name
-  file_name="$(bfl::get_file_name "$1")" || bfl::die "bfl::get_file_name '$1'" $?
+  local file_name="$1"
+#  J.Mooring
+#  file_name="$(bfl::get_file_name "$1")" || { bfl::error "bfl::get_file_name '$1'"; return $?; }
+#  printf "%s" "${file_name##*.}"
+
+  # Detect some common multi-extensions
+  [[ "$file_name" =~ \.tar\.[gx]z$ ]]   && { echo "${file_name:0 -6}"; return 0; }
+  [[ "$file_name" =~ \.tar\.bz2$ ]]     && { echo "${file_name:0 -7}"; return 0; }
+
   local file_extension="${file_name##*.}"
+  [[ "$file_name" =~ \.log\.[0-9]+$ ]]  && { echo "${file_name:0 -4-${#file_extension}}"; return 0; }
 
-  printf "%s" "${file_extension}"
+  [[ ${#file_name} -eq ${#file_extension} ]] && file_extension=""
+  printf "%s\\n" "${file_extension}"
   }
+
+#  [[ ${_BFL_HAS_SED} -eq 1 ]] || { bfl::writelog_fail "${FUNCNAME[0]}: dependency tput not found"; return ${BFL_ErrCode_Not_verified_dependency}; }  # Verify dependencies.
+#  echo "$s" | sed 's/^.*\.\([^.]*\)$/\1/'

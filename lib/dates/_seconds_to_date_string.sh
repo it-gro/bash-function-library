@@ -3,29 +3,27 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
 #
-# Library of number operating functions
+# Library of functions to help work with dates and time
 #
-# @author  Joe Mooring
+# @author
 #
 # @file
-# Defines function: bfl::is_integer().
+# Defines function: bfl::seconds_to_date_string().
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # @function
-#   Determines if the argument is an integer.
+#   Synonim bfl::time_convert_s_to_hhmmss()
 #
-# @param String $value_to_test
-#   The value to be tested.
+# @param Integer $seconds
+#   The number of seconds to convert.
 #
-# @example
-#   bfl::is_integer "8675309"
+# @return String $hhmmss
+#   The number of seconds in hh:mm:ss format.
 #------------------------------------------------------------------------------
-bfl::is_integer() {
-  # Verify arguments count.
-  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
-
-  [[ "$1" =~ ^-{0,1}[0-9]+$ ]] # || return 1
+bfl::seconds_to_date_string() {
+  local hhmmss
+  hhmmss=$(bfl::time_convert_s_to_hhmmss "$@") || return $?
+  printf "%s\\n" "$hhmmss"
   }

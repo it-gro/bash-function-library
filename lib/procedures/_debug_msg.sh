@@ -3,31 +3,31 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ------------- https://github.com/jmooring/bash-function-library -------------
+# --------- https://github.com/AlexeiKharchev/bash_functions_library ----------
 #
 # Library of internal library functions
 #
-# @author  Joe Mooring
+# @author  Alexei Kharchev
 #
 # @file
-# Defines function: bfl::warn().
+# Defines function: bfl::debug_msg().
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # @function
-#   Prints a warning message to stderr.
+#   Prints a debug message to stderr.
 #
-# The message provided will be prepended with "Warning. "
+# The message provided will be prepended with "Debug message. "
 #
 # @param String $msg (optional)
 #   The message.
 #
 # @example
-#   bfl::warn "The foo is bar."
+#   bfl::debug_msg "The foo is bar."
 #------------------------------------------------------------------------------
-bfl::warn() {
+bfl::debug_msg() {
   local writelog=false
-  if ! [[ ${BASH_LOG_LEVEL} -lt ${_BFL_LOG_LEVEL_WARN} ]]; then
+  if ! [[ ${BASH_LOG_LEVEL} -lt ${_BFL_LOG_LEVEL_DEBUG} ]]; then
       [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true
   fi
 
@@ -43,16 +43,16 @@ bfl::warn() {
 
   # Declare positional argument (readonly).
   local msg="$1"
-  [[ -z "$1" ]] && msg="Unspecified warning."
+  [[ -z "$1" ]] && msg="Debug message."
 
   # shellcheck disable=SC2154
   if [[ $writelog == true ]]; then # writes message and stack.
-      bfl::write_log_warn "Warning: ${msg}"
-      bfl::write_log_warn "[${stack}]"
+      bfl::write_log_debug "Debug message: ${msg}"
+      bfl::write_log_debug "[${stack}]"
       (( $#>= 0 && $#<= 1 )) || bfl::write_log_error "arguments count $# ∉ [0..1]."
   elif [[ $BASH_INTERACTIVE == true ]]; then # prints message and stack.
-      printf "%b\\n" "${CLR_WARN}Warning. ${msg}${NC}" 1>&2
-      printf "%b\\n" "${CLR_WARN}[${stack}]${NC}" 1>&2
+      printf "%b\\n" "${CLR_DEBUG}Debug message. ${msg}${NC}" 1>&2
+      printf "%b\\n" "${CLR_DEBUG}[${stack}]${NC}" 1>&2
       (( $#>= 0 && $#<= 1 )) || printf "%b\\n" "${CLR_BAD}arguments count $# ∉ [0..1].${NC}" 1>&2
   fi
   }

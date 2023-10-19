@@ -3,7 +3,7 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+# ------------- https://github.com/jmooring/bash-function-library -------------
 #
 # Library of internal library functions
 #
@@ -15,11 +15,11 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Prints a fatal error message to stderr, then exits with status code 1.
+#   Prints a fatal error message to stderr, then exits with status code 1.
 #
 # The message provided will be prepended with "Fatal error. "
 #
-# @param string $msg (optional)
+# @param String $msg (optional)
 #   The message.
 #
 # @example
@@ -28,22 +28,35 @@
 # shellcheck disable=SC2154
 #------------------------------------------------------------------------------
 bfl::die() {
-  # Verify arguments count.
-  (( $#>= 0 && $#<= 2 )) || bfl::die "arguments count $# ∉ [0..2]." ${BFL_ErrCode_Not_verified_args_count}
+  local -i iErr=${2:-1}
+
+  local writelog=false
+  if ! [[ ${BASH_LOGLEVEL} -lt ${_BFL_LOG_LEVEL_ERROR} ]]; then
+      [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true
+  fi
+
+  [[ $BASH_INTERACTIVE == true ]] || [[ $writelog == true ]] || exit $iErr
+
 
   # Build a string showing the "stack" of functions that got us here.
   local stack="${FUNCNAME[*]}"
   stack="${stack// / <- }"
 
   # Declare positional argument (readonly).
-  declare -r msg="${1:-"Unspecified fatal error."}"
+  local msg="$1"
+  [[ -z "$1" ]] && msg="Unspecified error."
+
+  # shellcheck disable=SC2154
+  if [[ $writelog == true ]]; then # Print the stack.
+      printf "%b\\n" "${bfl_aes_red}Error. ${msg}${bfl_aes_reset}" >> "${BASH_FUNCTIONS_LOG}"
+      printf "%b\\n" "${bfl_aes_yellow}[${stack}]${bfl_aes_reset}" >> "${BASH_FUNCTIONS_LOG}"
+  fi
 
   # Print the message.
-  printf "%b\\n" "${bfl_aes_red}Fatal error. ${msg}${bfl_aes_reset}" 1>&2
+  if [[ $BASH_INTERACTIVE == true ]]; then # Print the stack.
+      printf "%b\\n" "${bfl_aes_red}Error. ${msg}${bfl_aes_reset}" 1>&2
+      printf "%b\\n" "${bfl_aes_yellow}[${stack}]${bfl_aes_reset}" 1>&2
+  fi
 
-  # Print the stack.
-  printf "%b\\n" "${bfl_aes_yellow}[${stack}]${bfl_aes_reset}" 1>&2
-
-  local -i iErr=${2:-1}
   exit $iErr
   }

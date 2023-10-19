@@ -15,9 +15,9 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Determines if the argument is a positive integer.
+#   Determines if the argument is a positive integer.
 #
-# @param string $value_to_test
+# @param String $value_to_test
 #   The value to be tested.
 #
 # @example
@@ -25,7 +25,7 @@
 #------------------------------------------------------------------------------
 bfl::is_positive_integer() {
   # Verify arguments count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   [[ "$1" =~ ^[1-9][0-9]*$ ]] # || return 1
   }

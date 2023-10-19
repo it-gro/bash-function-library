@@ -20,7 +20,7 @@
 # @param String $cmd_name
 #   Name of the binary to check for existence.
 #
-# @return boolean $result
+# @return Boolean $result
 #     0 / 1   ( true / false )
 #
 # @example
@@ -28,12 +28,12 @@
 #------------------------------------------------------------------------------
 bfl::command_exists() {
   # Verify arguments count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1." ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   if command -v "$1" >/dev/null 2>&1; then
       return 0
   fi
 
-  #bfl::writelog_debug "Did not find command: '$1'"
+  bfl::warn "Did not find command: '$1'"
   return 1
   }

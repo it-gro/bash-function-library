@@ -15,7 +15,7 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Prints the arguments passed to this function.
+#   Prints the arguments passed to this function.
 #
 # A debugging tool. Accepts between 1 and 999 arguments.
 #
@@ -27,7 +27,7 @@
 #------------------------------------------------------------------------------
 bfl::print_args() {
   # Verify arguments count.
-  (( $#>= 1 && $#<= 999 )) || bfl::die "arguments count $# ∉ [1..999]" ${BFL_ErrCode_Not_verified_args_count}
+  (( $#>= 1 && $#<= 999 )) || { bfl::error "arguments count $# ∉ [1..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   local -ar args=("$@")
 
@@ -37,8 +37,8 @@ bfl::print_args() {
 
   printf "===== Begin output from %s =====\\n" "${FUNCNAME[0]}"
   for arg in "${args[@]}"; do
-    ((counter++)) || true
-    printf "$%s = %s\\n" "${counter}" "${arg}"
+      ((counter++)) || true
+      printf "$%s = %s\\n" "${counter}" "${arg}"
   done
 
   printf "===== End output from %s =====\\n" "${FUNCNAME[0]}"

@@ -54,34 +54,42 @@
 #
 # To simplify usage, place this line at the top of $HOME/.bashrc:
 #
-#   export BASH_FUNCTION_LIBRARY="$HOME/path/to/autoloader.sh"
+#   export BASH_FUNCTIONS_LIBRARY="$HOME/path/to/autoloader.sh"
 #
 # Then, at the top of each new script add:
 #
-#   if ! source "${BASH_FUNCTION_LIBRARY}"; then
-#     printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
-#     exit 1
-#   fi
+#   source "${BASH_FUNCTIONS_LIBRARY}" ||
+#     { printf "Error. Unable to source BASH_FUNCTIONS_LIBRARY.\\n" 1>&2; exit 1; }
 #
 # shellcheck disable=SC1091
 # shellcheck disable=SC2034
 #------------------------------------------------------------------------------
 
-# each script header depends on $BASH_FUNCTIONS_LIBRARY, so it is neccesary
+# each script header depends on ${BASH_FUNCTIONS_LIBRARY}, so it is neccesary
 [[ "${BASH_SOURCE}" = "${BASH_FUNCTIONS_LIBRARY}" ]] || return 1
 
 # protect from reloading twice
-source "${BASH_SOURCE%/*}"/lib/procedures/_transform_bfl_script_name.sh
+source "${BASH_FUNCTIONS_LIBRARY%/*}"/lib/procedures/_transform_bfl_script_name.sh
 _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE##*/})"
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 
 # Confirm we have BASH greater than v4
 source "${BASH_SOURCE%/*}"/lib/procedures/_die.sh
+source "${BASH_SOURCE%/*}"/lib/procedures/_error.sh
 [[ -z "${BASH_VERSINFO+x}" ]] || [[ "${BASH_VERSINFO:-0}" -ge 4 ]] ||
   bfl::die "Error: BASH_VERSINFO is '${BASH_VERSINFO:-0}'.  This script requires BASH v4 or greater."
 
 # some global variables
 source "${BASH_SOURCE%/*}"/consts
+
+case $- in
+    *i*)   # Only if running interactively
+        ;; # do nothing
+    *)     # do nothing
+        unset BASH_INTERACTIVE;
+        readonly BASH_INTERACTIVE=false;
+        ;; # non-interactive
+esac
 
 #set -uo pipefail
 set +u # The only checking I can switch on
@@ -125,7 +133,7 @@ EOF
   local file        # source functions
   for file in "${autoload_directory}"/lib/*/_*.sh; do
 # shellcheck disable=SC1090
-    source "${file}" || bfl::die "source '${file}'"
+      source "${file}" || bfl::die "source '${file}'"
   done
   }
 
@@ -139,7 +147,7 @@ else
   bfl::autoload "$@"
 fi
   #                                                                                                 {BASH_SOURCE[*]}  $1 $2 $3 $4 $5 $6 $7 $8 $9
-#  trap 'bfl::trap_cleanup "$?" "${BASH_LINENO[*]}" "$LINENO" "${FUNCNAME[*]}" "$BASH_COMMAND" "$0" "${BASH_SOURCE[0]}" "$*" "${BASH_FUNCTION_LOG}"' EXIT INT TERM SIGINT SIGQUIT SIGTERM ERR
+#  trap 'bfl::trap_cleanup "$?" "${BASH_LINENO[*]}" "$LINENO" "${FUNCNAME[*]}" "$BASH_COMMAND" "$0" "${BASH_SOURCE[0]}" "$*" "${BASH_FUNCTIONS_LOG}"' EXIT INT TERM SIGINT SIGQUIT SIGTERM ERR
 
 # Enable xtrace if the DEBUG environment variable is set
 [[ "${DEBUG,,}" =~ ^1|yes|true$ ]] && set -o xtrace    # Trace the execution of the script (debug)

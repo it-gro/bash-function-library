@@ -15,17 +15,18 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Joins multiple strings into a single string, separated by another string.
+#   Joins multiple strings into a single string, separated by another string.
 #
 # This function will accept an unlimited number of arguments.
 # Example: bfl::join "," "foo" "bar" "baz"
 #
-# @param string $glue
+# @param String $glue
 #   The character or characters that will be used to glue the strings together.
+#
 # @param list $pieces
 #   The list of strings to be combined.
 #
-# @return string $Rslt
+# @return String $Rslt
 #   The joined string.
 #
 # @example
@@ -33,7 +34,7 @@
 #-----------------------------------------------------------------------------
 bfl::join() {
   # Verify arguments count.
-  (( $#>= 2 && $#<= 999 )) || bfl::die "arguments count $# ∉ [2..999]" ${BFL_ErrCode_Not_verified_args_count}
+  (( $#>= 2 && $#<= 999 )) || { bfl::error "arguments count $# ∉ [2..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   local -r glue="$1"
   shift   # Delete the first positional parameter.
@@ -44,12 +45,12 @@ bfl::join() {
 
   while (( "${#pieces[@]}" )); do
       if [[ "${#pieces[@]}" -eq "1" ]]; then
-          Rslt+=$(printf "%s\\n" "${pieces[0]}") || bfl::die "printf '%s\\n' '${pieces[0]}'"
+          Rslt+=$(printf "%s\\n" "${pieces[0]}") || { bfl::error "printf '%s\\n' '${pieces[0]}'"; return 1; }
       else
-          Rslt+=$(printf "%s%s" "${pieces[0]}" "${glue}") || bfl::die "printf '%s%s' '${pieces[0]}' '${glue}'"
+          Rslt+=$(printf "%s%s" "${pieces[0]}" "${glue}") || { bfl::error "printf '%s%s' '${pieces[0]}' '${glue}'"; return 1; }
       fi
       pieces=("${pieces[@]:1}")   # Shift the first element off of the array.
   done
 
-  printf "%s" "$Rslt"
+  printf "%s\\n" "$Rslt"
   }

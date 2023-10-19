@@ -3,29 +3,28 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+# ------------- https://github.com/jmooring/bash-function-library -------------
 #
-# Library of number operating functions
+# Library of functions related to manipulations with files
 #
-# @author  Joe Mooring
+# @author
 #
 # @file
-# Defines function: bfl::is_integer().
+# Defines function: bfl::get_file_basename().
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 # @function
-#   Determines if the argument is an integer.
+#   Synonim bfl::get_file_name_without_extension(). Don't mix with  basename !
 #
-# @param String $value_to_test
-#   The value to be tested.
+# @param String $_path
+#   A relative path, absolute path, or symbolic link.
 #
-# @example
-#   bfl::is_integer "8675309"
+# @return String $file_name_without_extension
+#   The file name, excluding extension.
 #------------------------------------------------------------------------------
-bfl::is_integer() {
-  # Verify arguments count.
-  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
-
-  [[ "$1" =~ ^-{0,1}[0-9]+$ ]] # || return 1
+bfl::get_file_basename() {
+  local _path
+  _path=$(bfl::get_file_name_without_extension "$@") || return $?
+  printf "%s\\n" "${_path}"
   }

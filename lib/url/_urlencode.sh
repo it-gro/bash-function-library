@@ -2,6 +2,7 @@
 
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
+#------------------------------------------------------------------------------
 # ------------- https://github.com/jmooring/bash-function-library -------------
 # ----------------- https://github.com/ariver/bash_functions ------------------
 #
@@ -15,14 +16,14 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Percent-encodes a URL.
+#   Percent-encodes a URL.
 #
 # See <https://tools.ietf.org/html/rfc3986#section-2.1>.
 #
-# @param string $str
+# @param String $str
 #   The string to be encoded.
 #
-# @return string $Rslt
+# @return String $Rslt
 #   The encoded string.
 #
 # @example
@@ -30,14 +31,14 @@
 #------------------------------------------------------------------------------
 bfl::urlencode() {
   # Verify argument count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1" ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify argument values.
-  bfl::is_blank "$1" && bfl::die "String is empty or blank!"
+  bfl::is_blank "$1" && { bfl::error "String is empty or blank!"; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   local Rslt
   if [[ ${_BFL_HAS_JQ} -eq 1 ]]; then
-      Rslt=$(jq -Rr @uri <<< "$1") || bfl::die "jq -Rr @uri <<< '$1'"
+      Rslt=$(jq -Rr @uri <<< "$1") || { bfl::error "jq -Rr @uri <<< '$1'"; return $?; }
   else
       local -i i=0
       local -i k=${#1}
@@ -58,7 +59,7 @@ bfl::urlencode() {
               fi
               s="${str:i}"
           fi
-      done  
+      done
 # ---------- https://github.com/natelandau/shell-scripting-templates ----------
 #      More compact, but per 1 symbol
 #      for ((i = 0; i < ${#1}; i++)); do
@@ -93,5 +94,3 @@ bfl::urlencode() {
 #  printf "%s\\n" "${Rslt}"
   printf "\\n"  # для удобства в терминале, результирующую строку не увеличивает
   }
-
-bfl::encode_url() { bfl::urlencode "$@"; return $?; }

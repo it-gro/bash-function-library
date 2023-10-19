@@ -3,7 +3,7 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+# ------------- https://github.com/jmooring/bash-function-library -------------
 #
 # Library of functions related to manipulations with files
 #
@@ -15,12 +15,12 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Gets the canonical path to a file.
+#   Gets the canonical path to a file.
 #
-# @param string $path
+# @param String $path
 #   A relative path, absolute path, or symbolic link.
 #
-# @return string $canonical_file_path
+# @return String $canonical_file_path
 #   The canonical path to the file.
 #
 # @example
@@ -28,17 +28,18 @@
 #------------------------------------------------------------------------------
 bfl::get_file_path() {
   # Verify arguments count.
-  [[ $# -eq 1 ]] || bfl::die "arguments count $# ≠ 1" ${BFL_ErrCode_Not_verified_args_count}
+  [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify arguments' values.
-  bfl::is_blank "$1" && bfl::die "The path is required." ${BFL_ErrCode_Not_verified_arg_values}
+  bfl::is_blank "$1" && { bfl::error "The path is required."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
+  local -i iErr
   # Verify that the path exists.
   local canonical_file_path
-  canonical_file_path="$(readlink -e "$1")" || bfl::die "readlink -e '$1'" $?
+  canonical_file_path="$(readlink -e "$1")" || { iErr=$?; bfl::error "readlink -e '$1'"; return ${iErr}; }
 
   # Verify that the path points to a file, not a directory.
-  [[ -f "${canonical_file_path}" ]] || bfl::die "'${canonical_file_path}' is not a file."
+  [[ -f "${canonical_file_path}" ]] || { bfl::error "'${canonical_file_path}' is not a file."; return 1; }
 
-  printf "%s" "${canonical_file_path}"
+  printf "%s\\n" "${canonical_file_path}"
   }

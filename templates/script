@@ -11,7 +11,7 @@
 # @function
 # Displays usage message.
 #
-# @return string $msg
+# @return String $msg
 #   The usage message.
 #------------------------------------------------------------------------------
 usage() {
@@ -48,6 +48,7 @@ cleanup() {
 #
 # @param type $foo # TODO
 #   Description. # TODO
+#
 # @param type $bar # TODO
 #   Description. # TODO
 #
@@ -55,21 +56,21 @@ cleanup() {
 #------------------------------------------------------------------------------
 main() {
   # Verify argument count.
-  [[ $# -eq 2 ]] || { usage; exit 1; }
+  [[ $# -eq 2 ]] || { usage; return 1; }
   # bfl::verify_arg_count "$#" 2 2 || bfl::die "arguments count $# ≠ 2." ${BFL_ErrCode_Not_verified_args_count}
 
   # Display usage message if requested.
-# [[ "$#" -gt 0 && 
-  [[               ("$1" = "-h" || "$1" = "--help") ]] && { usage; exit 0; }
+# [[ "$#" -gt 0 &&
+  [[               ("$1" = "-h" || "$1" = "--help") ]] && { usage; return 0; }
 
   # Source the Bash Function Library.
-  if ! source "${BASH_FUNCTION_LIBRARY}"; then
-    printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
-    exit 1
+  if ! source "${BASH_FUNCTIONS_LIBRARY}"; then
+    printf "Error. Unable to source BASH_FUNCTIONS_LIBRARY.\\n" 1>&2
+    return 1
   fi
 
   # Verify dependencies.     # TODO
-  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || bfl::die "dependency 'printf' not found" ${BFL_ErrCode_Not_verified_dependency}
+  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || { bfl::error "dependency 'printf' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
 
   # Declare positional arguments (readonly, sorted by position).
   local -r foo="$1" # TODO
@@ -84,8 +85,8 @@ main() {
   local ham="Seamus" # TODO
 
   # Verify argument values.
-  bfl::is_empty "${foo}" && bfl::die "Foo is required." # TODO
-  bfl::is_empty "${bar}" && bfl::die "Bar is required." # TODO
+  bfl::is_empty "${foo}" && { bfl::error "Foo is required."; return 1; } # TODO
+  bfl::is_empty "${bar}" && { bfl::error "Bar is required."; return 1; } # TODO
 
   # TODO
   printf "%s\\n" "${foo}, ${bar}, ${wibble}, ${wobble}, ${eggs}, and ${ham}."

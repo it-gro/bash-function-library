@@ -3,7 +3,7 @@
 [[ "$BASH_SOURCE" =~ "${BASH_FUNCTIONS_LIBRARY%/*}" ]] && _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE})" || return 0
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 #------------------------------------------------------------------------------
-# ----------- https://github.com/jmooring/bash-function-library.git -----------
+# ------------- https://github.com/jmooring/bash-function-library -------------
 #
 # Library of functions related to constants declarations
 #
@@ -15,7 +15,7 @@
 
 #------------------------------------------------------------------------------
 # @function
-# Declares ANSI escape sequences.
+#   Declares ANSI escape sequences.
 #
 # These are ANSI escape sequences for controlling a VT100 terminal. Examples
 # for using these constants within a script:
@@ -30,27 +30,33 @@
 # run as a cron job, you don't want to see the ANSI escape sequences
 # surrounding error messages when viewing logs or emails sent by cron.
 #
-# To disable color output, set the BASH_FUNCTION_LIBRARY_COLOR_OUTPUT
+# To disable color output, set the BASH_FUNCTIONS_LIBRARY_COLOR_OUTPUT
 # environment variable to "disabled" before sourcing the autoloader. For
 # example:
 #
-#   export BASH_FUNCTION_LIBRARY_COLOR_OUTPUT=disabled
-#   if ! source "${BASH_FUNCTION_LIBRARY}"; then
-#     printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
+#   export BASH_FUNCTIONS_LIBRARY_COLOR_OUTPUT=disabled
+#   source "${BASH_FUNCTIONS_LIBRARY}" || {
+#     printf "Error. Unable to source BASH_FUNCTIONS_LIBRARY.\\n" 1>&2
 #     exit 1
-#   fi
+#     }
 #
-#    FOR 'black' 'red' 'green' 'yellow' 'blue' 'magenta' 'cyan' 'white'
+# FOR 'black' 'red' 'green' 'yellow' 'blue' 'magenta' 'cyan' 'white'
+#
 # @return global string $bfl_aes_color
 #   ANSI escape sequence for color.
+#
 # @return global string $bfl_aes_color_bold
 #   ANSI escape sequence for color + bold.
+#
 # @return global string $bfl_aes_color_faint
 #   ANSI escape sequence for color + faint.
+#
 # @return global string $bfl_aes_color_underline
 #   ANSI escape sequence for color + underline.
+#
 # @return global string $bfl_aes_color_blink
 #   ANSI escape sequence for color + blink.
+#
 # @return global string $bfl_aes_color_reverse
 #   ANSI escape sequence for color + reverse.
 #
@@ -63,7 +69,8 @@
 #------------------------------------------------------------------------------
 bfl::declare_ansi_escape_sequences() {
   [[ "${BASH_COLOURED:=true}" =~ ^1|yes|true$ ]] && local bEnabled=true || local bEnabled=false
-#                                                       magenta = purple                                                      
+#  [[ "$TERM" =~ 256color ]] && local use256=true || local use256=false
+#                                                       magenta = purple
   local ar_clrs=('black' 'red' 'green' 'yellow' 'blue' 'magenta' 'purple' 'cyan' 'white')
   local ar_nmbrs=(30 31 32 33 34 35 35 36 37)
 
@@ -76,17 +83,17 @@ bfl::declare_ansi_escape_sequences() {
   for ((i = 0; i < max; i++)); do
       sColor=${ar_clrs[$i]}
       iNumbr=${ar_nmbrs[$i]}
-      s="bfl_aes_$sColor";             $bEnabled && declare -gr "$s"="\\033[0;${iNumbr}m" || declare -gr "$s"=""
-      s="bfl_aes_${sColor}_bold";      $bEnabled && declare -gr "$s"="\\033[1;${iNumbr}m" || declare -gr "$s"=""
-      s="bfl_aes_${sColor}_faint";     $bEnabled && declare -gr "$s"="\\033[2;${iNumbr}m" || declare -gr "$s"=""
-      s="bfl_aes_${sColor}_underline"; $bEnabled && declare -gr "$s"="\\033[4;${iNumbr}m" || declare -gr "$s"=""
-      s="bfl_aes_${sColor}_blink";     $bEnabled && declare -gr "$s"="\\033[5;${iNumbr}m" || declare -gr "$s"=""
-      s="bfl_aes_${sColor}_reverse";   $bEnabled && declare -gr "$s"="\\033[7;${iNumbr}m" || declare -gr "$s"=""
+      s="bfl_aes_$sColor";             $bEnabled && readonly "$s"="\\033[0;${iNumbr}m" || readonly "$s"=""
+      s="bfl_aes_${sColor}_bold";      $bEnabled && readonly "$s"="\\033[1;${iNumbr}m" || readonly "$s"=""
+      s="bfl_aes_${sColor}_faint";     $bEnabled && readonly "$s"="\\033[2;${iNumbr}m" || readonly "$s"=""
+      s="bfl_aes_${sColor}_underline"; $bEnabled && readonly "$s"="\\033[4;${iNumbr}m" || readonly "$s"=""
+      s="bfl_aes_${sColor}_blink";     $bEnabled && readonly "$s"="\\033[5;${iNumbr}m" || readonly "$s"=""
+      s="bfl_aes_${sColor}_reverse";   $bEnabled && readonly "$s"="\\033[7;${iNumbr}m" || readonly "$s"=""
   done
 
 #                                       \[\033[00m\]
-  $bEnabled && declare -gr bfl_aes_reset="\\033[0m"  || declare -gr bfl_aes_reset=""
-  $bEnabled && declare -gr bfl_aes_gray="\033[0;37m" || declare -gr bfl_aes_gray=""
+  $bEnabled && readonly bfl_aes_reset="\\033[0m"  || readonly bfl_aes_reset=""
+  $bEnabled && readonly bfl_aes_gray="\033[0;37m" || readonly bfl_aes_gray=""
   }
 
 bfl::declare_ansi_escape_sequences

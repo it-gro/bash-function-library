@@ -2,12 +2,13 @@
 
 ## Coding Standards
 
-[Getting Started](#getting-started)  
-[Indenting and Whitespace](#indenting-and-whitespace)  
-[Naming Conventions](#naming-conventions)  
-[Syntax](#syntax)  
-[Other](#other)  
-[Library Functions](#library-functions)  
+[Getting Started](#getting-started)
+[Indenting and Whitespace](#indenting-and-whitespace)
+[Error handling](#error-handling)
+[Naming Conventions](#naming-conventions)
+[Syntax](#syntax)
+[Other](#other)
+[Library Functions](#library-functions)
 
 ### Getting Started
 
@@ -28,6 +29,18 @@ Guide](https://google.github.io/styleguide/shell.xml).
 * Files should have Unix line endings `\n`, not Windows line endings `\r\n`.
 * All files should end with a single newline `\n`.
 
+### Error handling
+
+- I refused from using in scripts bfl::die on error (as [JMooring](https://github.com/jmooring/bash-function-library)), because I am trying to integrate `Bash Functions Library` in all system scripts.<br />
+Moreover, this library is located in /etc directory (see [Usage](../../../#usage)).<br />
+Scripts should not die immediately, but write log and return code error.<br />
+Accordingly, using `exit 1` replaced by `write_log ...; return 1`.<br />
+I accept using `exit 1` instead of `return 1` in case of code mistakes **absolute absense**.<br />
+Another problem: `trap 'bfl::write_failure ... ' ERR` doesn't work correctly from `bfl::die` - exit should be called from function which is error source.
+
+I understand idea `bfl::die`, but I refused as `Bash` terminal halts on exit 1 (I am a novice in Bash and don't know many nuances)<br />
+See about `bfl::error`, `bfl::warn`, `bfl::die` at [error-handling.md](error-handling.md#bfl-die)
+
 ### Naming Conventions
 
 * Functions, constants, and variables should be lowercase, with words separated
@@ -37,9 +50,9 @@ Guide](https://google.github.io/styleguide/shell.xml).
 
 ### Syntax
 
-* Use double quotes instead of single quotes when possible.  
+* Use double quotes instead of single quotes when possible.
   `var="foo"`
-* Use braces when referencing a constant, variable, or environment variable.  
+* Use braces when referencing a constant, variable, or environment variable.
   `printf "%s" "${var}"`
 * Do not use braces when referring to `$@`, `$*`, `$#`, `$1`, `$2`, `$3`, etc.
   unless required to disambiguate a string.
@@ -51,10 +64,10 @@ Guide](https://google.github.io/styleguide/shell.xml).
 * Use `declare -r` instead of `readonly`.
 * Use `declare -g` when creating a global variable. Don't create global
 variables.
-* Declare and assign on the same line.  
+* Declare and assign on the same line.
   `declare -r foo="$1"`
 * Declare and assign on separate lines when using command
-  substitution. Don't do this:  
+  substitution. Don't do this:
   `declare foo=$(whoami)`
 
 ### Library Functions
