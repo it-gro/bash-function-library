@@ -1,4 +1,4 @@
-Main / [Usage](#usage) / [Libraries](#libraries) / [Installation](installation.md) / [Description](docs/description.md) / [Coding](docs/coding-standards.md) / [Configuration](#configuration) / [Examples](#examples) / [Tests](#tests) / [Templates](#templates) / [Docs](#documentation) / [ToDo](#todo)
+Main / [Usage](#usage) / [Libraries](#libraries) / [Functions](docs/function-list.md) / [Installation](docs/installation.md) / [Description](docs/description.md) / [Coding](docs/coding-standards.md) / [Constants](#Constants) / [Error handling](docs/error-handling.md) / [Tests](#tests) / [Templates](#templates) / [Examples](#examples) / [Docs](#documentation) / [ToDo](#todo)
 
 ## Bash Function Library (collection of utility functions)
 
@@ -12,6 +12,7 @@ If you see some errors or have improvements, you can discuss it within Telegram 
 | Author | weblink | comment |
 |:---:|---|:---:|
 | **Joe Mooring** | [https://github.com/jmooring/bash-function-library](https://github.com/jmooring/bash-function-library) | (is **not** POSIX compliant) |
+
 
 ### Usage
 
@@ -44,25 +45,6 @@ In order to handle errors there is declaration `trap 'bfl::trap_cleanup ...` in 
 so you need not to additionally declare `trap`.<br />
 Log file declared in `autoload.sh`:    `readonly BASH_FUNCTIONS_LOG="$HOME/.faults"`
 
-### Templates
-
-Use [_library_function.sh](templates/_library_function.sh) for writing new functions.
-
-|                         Library                        |                                          Description                                              |
-|:------------------------------------------------------:|---------------------------------------------------------------------------------------------------|
-| [_library_function.sh](templates/_library_function.sh) | Use to add some new function, in order to make coding simplier and folow unified coding standards |
-| [script](templates/script)                             | Use to create a script which leverages the Bash Function Library                                  |
-
-### Additionally
-
-Basic alerting and setting colors from [JMooring](https://github.com/jmooring/bash-function-library) functions (included in `autoload.sh` by default). Print messages to stdout and to a user specified logfile using the following functions.
-
-```bash
-warning "some text"   # Non-critical warnings
-error "some text"     # Prints errors and the function stack but does not stop the script.
-debug "some text"     # Printed only when in verbose (-v) mode
-   ... etc ...
-```
 
 ### Libraries
 
@@ -87,23 +69,50 @@ Each included function includes detailed usage information. Read the inline comm
 |:---:|:---:|:---:|:---:|:---:|:---:|
 |  |  |  | Apache Maven build tool |  | Sonatype Nexus software repository manager |
 
-### Configuration
+
+### Templates
+
+Use [_library_function.sh](templates/_library_function.sh) for writing new functions.
+
+|                         Library                        |                                          Description                                              |
+|:------------------------------------------------------:|---------------------------------------------------------------------------------------------------|
+| [_library_function.sh](templates/_library_function.sh) | Use to add some new function, in order to make coding simplier and folow unified coding standards |
+| [script](templates/script)                             | Use to create a script which leverages the Bash Function Library                                  |
+
+
+### Constants
+#### Global constants
+
+Alerting constants are declared in [consts](consts) from [Natelandau](https://github.com/natelandau/shell-scripting-templates).<br />
+Basic terminal colors are declared in functions [_declared_terminal_colors.sh](lib/_declared_terminal_colors.sh) and [_declare_ansi_escape_sequences.sh](lib/_declare_ansi_escape_sequences.sh) from [JMooring](https://github.com/jmooring/bash-function-library).<br />
+Global variables for available dependencies indicating are loaded at [autoload.sh](autoload.sh) last rows by calling [bfl::global_declare_dependencies](lib/procedures/_global_declare_dependencies.sh).<br />
 
 The following **global variables** must be set for the alert functions to work:
 | var | description | default |
 |:---:|---|:---:|
-| **`$BASH_INTERACTIVE`** | If `false`, prints to log file but not stdout | `true` |
+| **`${BASH_INTERACTIVE}`** | If `false`, prints to log file but not stdout | `true` |
 | **`$DEBUG`** | If `true`, prints `debug` level alerts to stdout | `false` |
 | **`$DRYRUN`** | If `true` does not eval commands passed to `_execute_` function | `false` |
-| **`$BASH_COLOURED`** | Disable coloured output. If `false`, command `tput` also needs var `$TERM` | `true` |
-| **`$LOGFILE`** | Path to a log file | `"$HOME/.faults"` |
-| **`$LOGLEVEL`** | One of: `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `ALL`, `OFF` | `ERROR` |
+| **`${BASH_COLOURED}`** | Disable coloured output. If `false`, command `tput` also needs var `$TERM` | `true` |
+| **`${BASH_FUNCTIONS_LOG}`** | Path to a log file | `"$HOME/.faults"` |
+| **`${BASH_LOG_LEVEL}`** | One of: `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `ALL`, `OFF` | `ERROR` |
+
+Print messages to stdout and to a user specified logfile using the following functions.<br />
+```bash
+warning "some text"   # Non-critical warnings
+error "some text"     # Prints errors and the function stack but does not stop the script.
+debug "some text"     # Printed only when in verbose (-v) mode
+   ... etc ...
+```
+
+#### Temporary variables
 
 Temporary variables in scripts:
 | var | description |
 |:---:|---|
-| **`$SPIN_NUM`** | Used in `_terminal_spinner.sh` |
-| **`$PROGRESS_BAR_PROGRESS`** | Used in `_terminal_progressbar.sh` |
+| **`${_bfl_temporary_var}`** | Used in almost every `_.sh` script header |
+| **`${SPIN_NUM}`** | Used in `_terminal_spinner.sh` |
+| **`${PROGRESS_BAR_PROGRESS}`** | Used in `_terminal_progressbar.sh` |
 
 ### The main script `autoload.sh` is roughly split into three sections:
 #### I. TOP: Description, options and global variables:
@@ -121,12 +130,14 @@ These default options are included in the templates and used throughout the util
 - **Script initialization** `bfl::autoload` is at the bottom of the `autoload.sh`. Uncomment or change the settings before `bfl::autoload` for your needs.
 Write the main logic of your script within the `_mainScript_` function. It is placed at the bottom of the file for easy access and editing.It is invoked at the end of the script after options are parsed and functions are sourced.
 
+
 ### Examples
 
 |                       Example                     |                                              Description                                              |
 |:-------------------------------------------------:|-------------------------------------------------------------------------------------------------------|
 | [examples/\_introduce.sh](examples/_introduce.sh) | This library function is simple and heavily&mdash; documented tutorial                                |
 | [examples/session-info](examples/session-info)    | This script leverages the Bash Function Library, displaying a banner with user and system information |
+
 
 ### Tests
 
@@ -141,9 +152,11 @@ Write the main logic of your script within the `_mainScript_` function. It is pl
 | [error-handling.md](docs/error-handling.md)     | Notes on error handling                   |
 | [functions-list.md](docs/functions-list.md)     | Is not updated yet                        |
 
+
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
 
 ### ToDo
 

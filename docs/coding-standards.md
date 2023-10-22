@@ -1,33 +1,74 @@
-# Bash Function Library
+[Main](../../../) / [Usage](../../../#usage) / [Libraries](../../../#libraries) / [Functions](function-list.md) / [Installation](installation.md) / [Description](description.md) / Coding / [Constants](../../../#Constants) / [Error handling](error-handling.md) / [Tests](../../../#tests) / [Templates](../../../#templates) / [Examples](../../../#examples) / [Docs](../../../#documentation) / [ToDo](../../../#todo)
 
 ## Coding Standards
 
-[Getting Started](#getting-started)
-[Indenting and Whitespace](#indenting-and-whitespace)
-[Error handling](#error-handling)
-[Naming Conventions](#naming-conventions)
-[Syntax](#syntax)
-[Other](#other)
-[Library Functions](#library-functions)
+[Getting Started](#getting-started) / [Indenting and Whitespace](#indenting-and-whitespace) / [About functions and library structure](#about-functions-and-library-structure) / [About function files](#about-function-files) / [Error handling](#error-handling) / [Naming Conventions](#naming-conventions) / [Variables](#variables) / [Coding](#coding) / [Library Functions](#library-functions) / [Scripts template](#scripts-template)
+
 
 ### Getting Started
 
-* When creating a new function for this library, please start with the
-  [function template](../templates/_library_function.sh).
-* When create a new script that leverages this library, you may find it useful
-  to start with the [script template](../templates/script).
-* Please review the [examples](../examples/).
+**In short: use template:** [function template](../../../templates/_library_function.sh) in order to make BFL functions similar and to folow unified coding standards.<br />
+Please, use this template to create a new library function. Contributions are welcome!
 
-With minor exceptions, this library follows Google's [Shell Style
-Guide](https://google.github.io/styleguide/shell.xml).
 
 ### Indenting and Whitespace
 
-* Line length should not exceed 79 characters.
+With minor exceptions, this library follows Google's [Shell Style
+Guide](https://google.github.io/styleguide/shell.xml).<br />
+
+* ~~Line length should not exceed 130 characters.~~
+* Indent with spaces, not tabs. My xed editor (standard for Cinnamon) follow this.<br />
 * Indent with 2 spaces, not tabs.
-* Remove trailing whitespace at the end of each line.
+Indent with 2 spaces for first indent (is provided by [shfmt](https://github.com/mvdan/sh)) and per 4 spaces for next indents.
+* Remove trailing whitespace at the end of each line. My xed editor (standard for Cinnamon) does it automatically.
 * Files should have Unix line endings `\n`, not Windows line endings `\r\n`.
-* All files should end with a single newline `\n`.
+* ~~Line length should not exceed 79 characters.~~
+* ~~All files should end with a single newline `\n`~~ My xed editor (standard for Cinnamon) cuts them.
+
+
+### About functions and library structure:
+- All libraries are located in `lib/`, every function located in `lib/[library_name]/` (like [Jarodiv](https://github.com/Jarodiv/bash-function-libraries)).<br />
+[Natelandau](https://github.com/natelandau/shell-scripting-templates) also keeps scripts in separate directory, but named `utilities`.<br />
+I have refused from nonstructured script location in project root (as in [JMooring](https://github.com/jmooring/bash-function-library) and [Ariver](https://github.com/ariver/bash_functions)).
+- Each library function name must begin with `bfl::` namespace prefix to avoid function name collisions (as [JMooring](https://github.com/jmooring/bash-function-library)).<br />
+For example, to trim a string:
+```bash
+bfl::trim "${var}"
+```
+Some git projects uses multilevel prefix, like `System::Efi::detect()` (as [Jarodiv](https://github.com/Jarodiv/bash-function-libraries)).<br />
+There is exception for MacOS library from [NateLandau](https://github.com/natelandau/shell-scripting-templates): I saved `bfl::MacOS::` prefix.<br />
+**For rest libraries** I refused from multilevel prefix and **use `bfl::` prefix only**.
+- Define **no more than one** library function per file (I have exception for `alert` functions-satellites).
+- File and function names should be in lowercase.
+- Script names use camel case with a starting underscores and should match `_function_name.sh` (like [JMooring](https://github.com/jmooring/bash-function-library)).<br />
+For example, if the function is named `bfl::foo`, the file name must be `_foo.sh`.
+- The file must not be executable. (don't apply `chmod +x` to scripts!).
+- If you create a library function named `bfl::foo`, and you need a helper function `bar` within the same file,<br />
+you can:<br />
+a) surround function `bfl::foo` body not by brackets, but by parentheses. After that put helper function inside `bfl::foo`.<br />
+It cause the function to execute inside other bash subshell, and helper function will not be visible in global namespace.<br />
+b) if you can not follow method described above, name the helper function `bfl::foo::bar` to avoid namespace collisions.
+
+#### About function files:
+
+- Most of functions depend on others.<br />
+In order to prevent sourcing scripts more than once there is a code at evey script header (similar to [Jarodiv](https://github.com/Jarodiv/bash-function-libraries)):
+```bash
+[[ "$BASH_SOURCE" =~ /bash_functions_library ]] && _bfl_temporary_var=$(echo "$BASH_SOURCE" | sed 's|^.*/lib/\([^/]*\)/\([^/]*\)\.sh$|_GUARD_BFL_\1\2|') || return 0
+[[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly $_bfl_temporary_var=1
+```
+- Each function script includes description and usage information. Read headers and inline comments within the code.
+- Script `autoload.sh` has header, similar to described above.<br />
+Beginning of `autoload.sh` a bit differ from scripts in `lib/*`, because `autoload.sh` doesn't not present in `lib/` structure.
+- Loading process in `autoload.sh` is very simple (line 136):<br />
+```bash
+for f in "${BASH_FUNCTIONS_LIBRARY%/*}"/lib/*/_*.sh; do    # $(dirname "$BASH_FUNCTIONS_LIBRARY")
+    source "$f" || {
+      [[ $BASH_INTERACTIVE == true ]] && printf "Error while loading $f\n" # > /dev/tty;
+      return 1
+      }
+```
+
 
 ### Error handling
 
@@ -41,51 +82,72 @@ Another problem: `trap 'bfl::write_failure ... ' ERR` doesn't work correctly fro
 I understand idea `bfl::die`, but I refused as `Bash` terminal halts on exit 1 (I am a novice in Bash and don't know many nuances)<br />
 See about `bfl::error`, `bfl::warn`, `bfl::die` at [error-handling.md](error-handling.md#bfl-die)
 
+
 ### Naming Conventions
 
-* Functions, constants, and variables should be lowercase, with words separated
-  by underscores.
-* Environment variables should be uppercase, with words separated by
-  underscores.
+- Functions, constants, and variables should be lowercase, with words separated
+  by underscores. [https://unix.stackexchange.com/questions/42847/are-there-naming-conventions-for-variables-in-shell-scripts](https://unix.stackexchange.com/questions/42847/are-there-naming-conventions-for-variables-in-shell-scripts)<br />
+- Global environment variables should be uppercase, with words separated by underscores.
+- Global variables defined within library functions must begin with `BFL_` or `bfl_` to avoid namespace collisions.
+- Local variables names use camel case starting with underscores (as [Natelandau](https://github.com/natelandau/shell-scripting-templates)).
+- **Exceptions to the variable an function naming rules** are made for alerting functions and colors to ease my speed<br />
+of programming. (Breaking years of habits is hard...) I.e. `notice "Some log item: ${Blue}blue text${NC}` where `notice` is<br />
+a function and `$Blue`, `$Red` and `$NC` are global variables but are not in uppercase.
+- I don't agree with leading underscores in variables and functions names:<br />
+**variables:**<br />
+Leading underscores (`_var`) often require using brackets like `"${_var}"`. Brackets don't free from quotes using.<br />
+That's why I don't see reason to use brackets inside quotes and write variables names with leading underscores: `"$var"`.<br />
+**functions and procedures:**<br />
+To my opinion, using for function names with camel case surround by underscores: `_nameOfFunction_`, is caused to avoid names collision.<br />
+But adding prefix `bfl::` before functions' names does the same. That's why i wish to refuse from leading underscores in functions' names.<br />
 
-### Syntax
+**BUT** Google style code and [ShellCheck](https://github.com/koalaman/shellcheck) require functions, constants, and variables to have words separated by underscores. [https://www.bashsupport.com/manual/inspections/](https://www.bashsupport.com/manual/inspections/)<br />
+With minor exceptions, this library follows Google's [Shell Style Guide](https://google.github.io/styleguide/shell.xml).
 
-* Use double quotes instead of single quotes when possible.
-  `var="foo"`
-* Use braces when referencing a constant, variable, or environment variable.
-  `printf "%s" "${var}"`
-* Do not use braces when referring to `$@`, `$*`, `$#`, `$1`, `$2`, `$3`, etc.
-  unless required to disambiguate a string.
 
-### Other
+### Variables
+
+* Use double quotes instead of single quotes when it is possible: `var="foo"`.
+* Use double quotes with variables when it does not conflict with code purpose: `var="foo"`.
+* Use braces when referencing a constant, variable, or environment variable. (Overly verbose true and a safe practice)<br />
+```bash
+printf "%s" "${var}"
+```
+**BUT** I am trying to **NOT** overload brackets using: `"$1"`, not `"${1}"`
+* Do not use braces when referring to `$@`, `$*`, `$#`, `$1`, `$2`, `$3` ... unless required to disambiguate a string.
+
+### Coding
 
 * Use `printf` instead of `echo`.
-* Use `declare` instead of `local`.
-* Use `declare -r` instead of `readonly`.
-* Use `declare -g` when creating a global variable. Don't create global
-variables.
-* Declare and assign on the same line.
-  `declare -r foo="$1"`
-* Declare and assign on separate lines when using command
-  substitution. Don't do this:
+* Use `local` instead of `declare`. IMHO `local ` is more simple to check script.<br />
+[in-bash-should-i-use-declare-instead-of-local-and-export](https://stackoverflow.com/questions/56627534/in-bash-should-i-use-declare-instead-of-local-and-export). Counter arguments for `declare` are welcome!
+* Use `readonly` instead of `declare -gr` for global variables, BUT:<br />
+* Use `declare -r` instead of `readonly`, because readonly uses the default scope of global even inside functions.<br />
+[https://stackoverflow.com/questions/30362831/what-is-difference-in-declare-r-and-readonly-in-bash](https://stackoverflow.com/questions/30362831/what-is-difference-in-declare-r-and-readonly-in-bash)
+* **Avoid global variables**. Use `declare -g` when creating a global variable.
+* Declare and assign on the same line `declare -r foo="$1"`.
+* Declare and assign on separate lines when using command substitution. Don't do this:
   `declare foo=$(whoami)`
+do so:
+```bash
+declare foo
+foo=$(whoami)
+```
+* If you need to use nested local functions inside other functions, use parentheses instead of braces, in order to avoid declare them in global scope:
+```bash
+foo() ( # !!!
+  new_foo={
+...
+}
+) # !!!
+```
+[https://stackoverflow.com/questions/38264873/nested-functions-on-bash](https://stackoverflow.com/questions/38264873/nested-functions-on-bash)
+
+* All scripts and functions are fully [Shellcheck](https://github.com/koalaman/shellcheck) compliant
+* Where possible, we should follow [defensive BASH programming](https://kfirlavi.herokuapp.com/blog/2012/11/14/defensive-bash-programming/) principles.
+
 
 ### Library Functions
-
-#### General
-
-* Library function names must begin with `bfl::` to avoid namespace collisions.
-* The file name must begin with an underscore.
-* The file name must end with `.sh`.
-* The file name must match the function name. For example, if the function is
-  named `bfl::foo`, the file name must be `_foo.sh`.
-* The file must not be executable.
-* Define no more than one library function per file.
-* If you create a library function named `bfl::foo`, and you need a helper
-  function `bar` within the same file, name the helper function `bfl::foo::bar`
-  to avoid namespace collisions.
-* Global variables defined within library functions must begin with `bfl_` to
-  avoid namespace collisions.
 
 #### Housekeeping Sequence
 
@@ -143,3 +205,7 @@ From the [example function](../examples/_introduce.sh):
 #   @return global string $foo
 #     The foo, which can either be "bar" or "baz".
 ```
+
+### Scripts template
+* When create a new script that leverages this library, you may find it useful to start with the [script template](../../../templates/script).
+* Please review the [examples](../../../examples/).

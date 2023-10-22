@@ -1,8 +1,9 @@
-# Bash Function Library
+[Main](../../../) / [Usage](../../../#usage) / [Libraries](../../../#libraries) / [Functions](function-list.md) / [Installation](installation.md) / [Description](description.md) / [Coding](coding-standards.md) / [Constants](../../../#Constants) / Error handling / [Tests](../../../#tests) / [Templates](../../../#templates) / [Examples](../../../#examples) / [Docs](../../../#documentation) / [ToDo](../../../#todo)
 
 ## Error Handling
 
 [BFL error vs BFL die](#bfl-die-vs-error) / [BFL die](#bfl-die) / [Verify arguments count](#verify-arguments-count) / [Guidelines](#guidelines)  / [Exit with Command Substitution](#exit-with-command-substitution)
+
 
 ### BFL error vs BFL die
 

@@ -19,9 +19,9 @@ usage() {
   msg=$(cat << EOT
 Creates documentation for library functions.
 
-Usage:    $(basename "$0")
+Usage:    ${0##*/}    # $(basename "$0")
 
-Example:  $(basename "$0")
+Example:  ${0##*/}    # $(basename "$0")
 EOT
   )
   printf "%s\\n" "${msg}"
@@ -54,6 +54,7 @@ main() {
   footer="*Last updated: $(date --iso-8601=s).*"
 
   local file   # Loop through the files.
+  # "$(dirname "${BASH_FUNCTIONS_LIBRARY}")"
   for file in "${BASH_FUNCTIONS_LIBRARY%/*}"/*/_*.sh; do
       # Set the headers for each section. Need to do this each time through the
       # loop because one or more may be pluralized if there is more than one.
