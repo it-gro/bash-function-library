@@ -27,9 +27,8 @@
 #------------------------------------------------------------------------------
 bfl::error() {
   local writelog=false
-  if ! [[ ${BASH_LOG_LEVEL} -lt ${_BFL_LOG_LEVEL_ERROR} ]]; then
-      [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true
-  fi
+  [[ ${BASH_LOG_LEVEL} -lt ${_BFL_LOG_LEVEL_ERROR} ]] ||
+      { [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true; }
 
   # Сама функция возвращает 0 - смысла нет оперировать кодом ошибки, из-за замены  exit 1 => return 1
   [[ $BASH_INTERACTIVE == true ]] || [[ $writelog == true ]] || return 0
@@ -38,8 +37,8 @@ bfl::error() {
   [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Build a string showing the "stack" of functions that got us here.
-  local stack="${FUNCNAME[*]}"
-  stack="${stack// / <- }"
+  local stack
+  stack="$(bfl::print_function_stack)"
 
   # Declare positional argument (readonly).
   local msg="$1"
@@ -47,12 +46,19 @@ bfl::error() {
 
   # shellcheck disable=SC2154
   if [[ $writelog == true ]]; then # writes message and stack.
-      bfl::write_log_error "Error. ${msg}"
-      bfl::write_log_error "[${stack}]"
-      (( $#>= 0 && $#<= 1 )) || bfl::write_log_error "arguments count $# ∉ [0..1]."
-  elif [[ $BASH_INTERACTIVE == true ]]; then # prints message and stack.
-      printf "%b\\n" "${CLR_BAD}Error. ${msg}${NC}" 1>&2
-      printf "%b\\n" "${Yellow}[${stack}]${NC}" 1>&2
-      (( $#>= 0 && $#<= 1 )) || printf "%b\\n" "${CLR_BAD}arguments count $# ∉ [0..1].${NC}" 1>&2
+      bfl::write_log_fail "Error. ${msg}"
+      bfl::write_log_fail "[${stack}]"
   fi
+
+  [[ $BASH_INTERACTIVE == true ]] || return 0
+  [[ -n "$PS1" ]] || return 0
+#  Only if running interactively
+  case $- in
+      *i*)  # Prints message and stack.
+          printf "%b\\n" "${CLR_BAD}Error. ${msg}${NC}" 1>&2
+          printf "%b\\n" "${CLR_DESCRIPT}[${stack}]${NC}" 1>&2
+          ;;
+      *)      # do nothing
+          ;;  # non-interactive
+  esac
   }

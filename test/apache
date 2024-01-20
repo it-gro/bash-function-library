@@ -8,7 +8,7 @@
 # @author  Joe Mooring
 #
 # @file
-# Performs assertion functions testing in this library.
+# Performs assertion functions testing system in this library.
 #
 # This simple testing mechanism has no provision for the construction and
 # deconstruction of unit test scaffolding. Consequently, I am unable to provide
@@ -31,14 +31,14 @@ declare_assertions() {
   declare -ga assertions=(
 #   bfl::is_apache_vhost
     'bfl::is_apache_vhost||1'
-    'bfl::is_apache_vhost|""|1'
-    'bfl::is_apache_vhost|"" ""|1'
-    'bfl::is_apache_vhost|" " " "|1'
+    'bfl::is_apache_vhost|""|2'
+    'bfl::is_apache_vhost|"" ""|2'
+    'bfl::is_apache_vhost|" " " "|2'
     'bfl::is_apache_vhost|"a" "b"|1'
-    'bfl::is_apache_vhost|"a"|1'
-    'bfl::is_apache_vhost|"a" " "|1'
-    'bfl::is_apache_vhost|"a" "b"|1'
-    'bfl::is_apache_vhost|"a" "/etc/apache2/sites-enabled"|1'
-    'bfl::is_apache_vhost|"/tmp" "b"|1'
+    'bfl::is_apache_vhost|"a"|2'
+    'bfl::is_apache_vhost|"a" " "|2'
+    'bfl::is_apache_vhost|"a" "b"|2'
+    'bfl::is_apache_vhost|"a" "/etc/apache2/sites-enabled"|2'
+    'bfl::is_apache_vhost|"/tmp" "b"|2'
   )
 }

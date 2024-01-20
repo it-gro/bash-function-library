@@ -56,7 +56,7 @@ there is no need for this function. Comparing verify_arg_count() with simple bas
 ```bash
 bfl::verify_arg_count "$#" 1 3 || { usage; exit 1; }
                          vs
-(( $#>= 1 && $#<= 3 )) ||
+(( $# > 0 && $# < 4 )) ||
   { bfl::error "arguments count $# ∉ [1..3]."; return 1; }
 ```
 

@@ -27,7 +27,7 @@
 #------------------------------------------------------------------------------
 bfl::print_args() {
   # Verify arguments count.
-  (( $#>= 1 && $#<= 999 )) || { bfl::error "arguments count $# ∉ [1..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
+  (( $# > 0 && $# < 1000 )) || { bfl::error "arguments count $# ∉ [1..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   local -ar args=("$@")
 

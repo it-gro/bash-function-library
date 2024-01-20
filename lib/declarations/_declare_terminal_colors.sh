@@ -94,6 +94,7 @@ bfl::declare_terminal_colors() {
           # ---------------------- Logging colors ----------------------
           declare -g CLR_GOOD="$Green"             # Bright Green
           declare -g CLR_INFORM="$Gray"            # Gray
+          declare -g CLR_DESCRIPT="$DarkOrange"    # Orange
           declare -g CLR_WARN="$Yellow"            # Bright Yellow
           declare -g CLR_DEBUG="$Purple"           # Bright Purple
           declare -g CLR_BAD="$Red"                # Bright Red
@@ -105,13 +106,14 @@ bfl::declare_terminal_colors() {
           # -> https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 
           [[ "$TERM" =~ 256color ]] && use256=true || use256=false
-          $use256 && declare -g CLR_GOOD="$(   printf '\033[38;5;10m')" || declare -g CLR_GOOD="$(   printf '\033[32;01m')"
-          $use256 && declare -g CLR_INFORM="$( printf '\033[38;5;2m')"  || declare -g CLR_INFORM="$( printf '\033[37;01m')"  # change to Gray
-          $use256 && declare -g CLR_DEBUG="$(  printf '\033[38;5;11m')" || declare -g CLR_DEBUG="$(  printf '\033[35;01m')"  # change to Purple
-          $use256 && declare -g CLR_WARN="$(   printf '\033[38;5;11m')" || declare -g CLR_WARN="$(   printf '\033[33;01m')"
-          $use256 && declare -g CLR_BAD="$(    printf '\033[38;5;9m')"  || declare -g CLR_BAD="$(    printf '\033[31;01m')"
-          $use256 && declare -g CLR_HILITE="$( printf '\033[38;5;14m')" || declare -g CLR_HILITE="$( printf '\033[36;01m')"
-          $use256 && declare -g CLR_BRACKET="$(printf '\033[38;5;12m')" || declare -g CLR_BRACKET="$(printf '\033[34;01m')"
+          $use256 && declare -g CLR_GOOD="$(     printf '\033[38;5;10m')" || declare -g CLR_GOOD="$(     printf '\033[32;01m')"
+          $use256 && declare -g CLR_INFORM="$(   printf '\033[38;5;2m')"  || declare -g CLR_INFORM="$(   printf '\033[37;01m')"  # change to Gray
+          $use256 && declare -g CLR_DESCRIPT="$( printf '\033[38;5;11m')" || declare -g CLR_DESCRIPT="$( printf '\033[33;01m')"
+          $use256 && declare -g CLR_DEBUG="$(    printf '\033[38;5;11m')" || declare -g CLR_DEBUG="$(    printf '\033[35;01m')"  # change to Purple
+          $use256 && declare -g CLR_WARN="$(     printf '\033[38;5;11m')" || declare -g CLR_WARN="$(     printf '\033[33;01m')"
+          $use256 && declare -g CLR_BAD="$(      printf '\033[38;5;9m')"  || declare -g CLR_BAD="$(      printf '\033[31;01m')"
+          $use256 && declare -g CLR_HILITE="$(   printf '\033[38;5;14m')" || declare -g CLR_HILITE="$(   printf '\033[36;01m')"
+          $use256 && declare -g CLR_BRACKET="$(  printf '\033[38;5;12m')" || declare -g CLR_BRACKET="$(  printf '\033[34;01m')"
 
           readonly CLR_NORMAL="$(printf '\033[0m')"
       fi

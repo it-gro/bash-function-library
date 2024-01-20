@@ -58,7 +58,7 @@ bfl::generate_password() {
   local -r pswd_length="$1"
 
   # Declare all other variables (sorted by name).
-  local {length_one,length_two,password}=
+  local length_one,length_two,password
 
   local -i iErr
   length_one=$(shuf -i 1-$((pswd_length-2)) -n 1) || { iErr=$?; bfl::error "shuf -i 1-\$((pswd_length-2)) -n 1"; return ${iErr}; }

@@ -31,7 +31,7 @@
 #------------------------------------------------------------------------------
 bfl::write_log_inform() {
   # Verify arguments count.
-  (( $#>= 1 && $#<= 3 )) || { bfl::error "arguments count $# ∉ [1..3]."; return ${BFL_ErrCode_Not_verified_args_count}; }
+  (( $# > 0 && $# < 4 )) || { bfl::error "arguments count $# ∉ [1..3]."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify arguments' values.
   bfl::is_blank "$1" && { bfl::error "Message is required."; return ${BFL_ErrCode_Not_verified_arg_values}; }

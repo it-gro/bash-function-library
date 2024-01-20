@@ -55,8 +55,8 @@
 #   bfl::lorem 3 virgil
 #------------------------------------------------------------------------------
 bfl::lorem() {
-  # Verify arguments count.
-  (( $#>=0 && $#<= 2 )) || { bfl::error "arguments count $# ∉ [0..2]."; return ${BFL_ErrCode_Not_verified_args_count}; }
+  # $#>=0 && Verify arguments count.
+  (( $# < 3 )) || { bfl::error "arguments count $# ∉ [0..2]."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify argument values.
   local -r paragraphs="${1:-1}"

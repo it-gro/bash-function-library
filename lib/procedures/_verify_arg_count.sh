@@ -40,12 +40,12 @@
 #------------------------------------------------------------------------------
 bfl::verify_arg_count() {
   # Verify argument count.
-  [[ "$#" -ne "3" ]] && { bfl::error "arguments count $# ≠ 3."; return ${BFL_ErrCode_Not_verified_args_count}; }
+  [[ "$#" -eq "3" ]] || { bfl::error "arguments count $# ≠ 3."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
-  # Verify arguments' values. Make sure all of the arguments are integers.
-  bfl::is_positive_integer "$1" || { bfl::error "'$1' expected to be an integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
-  bfl::is_positive_integer "$2" || { bfl::error "'$2' expected to be an integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
-  bfl::is_positive_integer "$3" || { bfl::error "'$3' expected to be an integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
+  local arg # Verify arguments' values. Make sure all of the arguments are integers.
+  for arg in "$1" "$2" "$3"; do
+    bfl::is_positive_integer "$arg" || { bfl::error "'$arg' expected to be an integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
+  done
 
   local -r arg_count="$1"
   local -r expected_min="$2"

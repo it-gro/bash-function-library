@@ -8,7 +8,7 @@
 # @author  Joe Mooring
 #
 # @file
-# Performs assertion directory functions testing in this library.
+# Performs assertion directory functions testing system in this library.
 #
 # This simple testing mechanism has no provision for the construction and
 # deconstruction of unit test scaffolding.

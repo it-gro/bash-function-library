@@ -68,27 +68,28 @@
 #   bfl::declare_ansi_escape_sequences
 #------------------------------------------------------------------------------
 bfl::declare_ansi_escape_sequences() {
-  [[ "${BASH_COLOURED:=true}" =~ ^1|yes|true$ ]] && local bEnabled=true || local bEnabled=false
+  [[ "${BASH_COLOURED:=true}" =~ ^1|yes|true$ ]] && local -r bEnabled=true || local -r bEnabled=false
 #  [[ "$TERM" =~ 256color ]] && local use256=true || local use256=false
 #                                                       magenta = purple
   local ar_clrs=('black' 'red' 'green' 'yellow' 'blue' 'magenta' 'purple' 'cyan' 'white')
   local ar_nmbrs=(30 31 32 33 34 35 35 36 37)
+  local bkgrnd=(0 103 0 0 0 0 0 0)
 
   local max=${#ar_clrs[@]}
-  local -i i
-  local sColor
-  local iNumbr
-  local s
+  local -i {i,iNumbr,iBackgrnd}=0
+  local {s,sb,sColor}=
 
   for ((i = 0; i < max; i++)); do
       sColor=${ar_clrs[$i]}
       iNumbr=${ar_nmbrs[$i]}
-      s="bfl_aes_$sColor";             $bEnabled && readonly "$s"="\\033[0;${iNumbr}m" || readonly "$s"=""
-      s="bfl_aes_${sColor}_bold";      $bEnabled && readonly "$s"="\\033[1;${iNumbr}m" || readonly "$s"=""
-      s="bfl_aes_${sColor}_faint";     $bEnabled && readonly "$s"="\\033[2;${iNumbr}m" || readonly "$s"=""
-      s="bfl_aes_${sColor}_underline"; $bEnabled && readonly "$s"="\\033[4;${iNumbr}m" || readonly "$s"=""
-      s="bfl_aes_${sColor}_blink";     $bEnabled && readonly "$s"="\\033[5;${iNumbr}m" || readonly "$s"=""
-      s="bfl_aes_${sColor}_reverse";   $bEnabled && readonly "$s"="\\033[7;${iNumbr}m" || readonly "$s"=""
+      iBackgrnd=${bkgrnd[$i]}; [[ $iBackgrnd -eq 0 ]] && sb="" || sb=";${iBackgrnd}"
+      s="bfl_aes_${sColor}";              $bEnabled && readonly "$s"="\\033[0;${iNumbr}m"       || readonly "$s"=""
+      s="bfl_aes_${sColor}_bold";         $bEnabled && readonly "$s"="\\033[1;${iNumbr}m"       || readonly "$s"=""
+      s="bfl_aes_${sColor}_faint";        $bEnabled && readonly "$s"="\\033[2;${iNumbr}m"       || readonly "$s"=""
+      s="bfl_aes_${sColor}_underline";    $bEnabled && readonly "$s"="\\033[4;${iNumbr}m"       || readonly "$s"=""
+      s="bfl_aes_${sColor}_blink";        $bEnabled && readonly "$s"="\\033[5;${iNumbr}${sb}m"  || readonly "$s"=""
+      s="bfl_aes_${sColor}_reverse";      $bEnabled && readonly "$s"="\\033[7;${iNumbr}m"       || readonly "$s"=""
+      s="bfl_aes_${sColor}_highlighted";  $bEnabled && readonly "$s"="\\033[7;${iNumbr}${sb}m"  || readonly "$s"=""
   done
 
 #                                       \[\033[00m\]
@@ -98,7 +99,7 @@ bfl::declare_ansi_escape_sequences() {
 
 bfl::declare_ansi_escape_sequences
 
-# ---------------------------- colors -------------------------------
+# ------------------------------- VT100 colors --------------------------------
 
 # readonly RED_E='\[\e[0;31m\]'
 # readonly PALERED_E=''                #                '\033[38;5;9m'

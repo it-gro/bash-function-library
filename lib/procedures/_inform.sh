@@ -25,9 +25,8 @@
 #------------------------------------------------------------------------------
 bfl::inform() {
   local writelog=false
-  if ! [[ ${BASH_LOG_LEVEL} -lt ${_BFL_LOG_LEVEL_INFORM} ]]; then
-      [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true
-  fi
+  [[ ${BASH_LOG_LEVEL} -lt ${_BFL_LOG_LEVEL_INFORM} ]] ||
+      { [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true; }
 
   # Сама функция возвращает 0 - смысла нет оперировать кодом ошибки, из-за замены  exit 1 => return 1
   [[ $BASH_INTERACTIVE == true ]] || [[ $writelog == true ]] || return 0
@@ -40,6 +39,15 @@ bfl::inform() {
 
   [[ $writelog == true ]] && printf "Inform: %b\\n" "${msg}" >> "${BASH_FUNCTIONS_LOG}"
 
-  # Print the message.
-  [[ $BASH_INTERACTIVE == true ]] && printf "%b\\n" "${CLR_INFORM}${msg}${NC}" 1>&2
+  [[ $BASH_INTERACTIVE == true ]] || return 0
+  [[ -n "$PS1" ]] || return 0
+
+#  Only if running interactively
+  case $- in
+      *i*)  # Prints message and stack.
+          printf "%b\\n" "${CLR_INFORM}${msg}${NC}" 1>&2
+          ;;
+      *)      # do nothing
+          ;;  # non-interactive
+  esac
   }

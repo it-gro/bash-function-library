@@ -31,16 +31,15 @@ bfl::die() {
   local -i iErr=${2:-1}
 
   local writelog=false
-  if ! [[ ${BASH_LOGLEVEL} -lt ${_BFL_LOG_LEVEL_ERROR} ]]; then
-      [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true
-  fi
+  [[ ${BASH_LOGLEVEL} -lt ${_BFL_LOG_LEVEL_ERROR} ]] ||
+      { [[ -n "$BASH_FUNCTIONS_LOG" ]] && [[ -f "$BASH_FUNCTIONS_LOG" ]] && writelog=true; }
 
   [[ $BASH_INTERACTIVE == true ]] || [[ $writelog == true ]] || exit $iErr
 
 
   # Build a string showing the "stack" of functions that got us here.
-  local stack="${FUNCNAME[*]}"
-  stack="${stack// / <- }"
+  local stack
+  stack="$(bfl::print_function_stack)"
 
   # Declare positional argument (readonly).
   local msg="$1"

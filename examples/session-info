@@ -52,10 +52,10 @@ cleanup() {
 main() {
 
   # Display usage message if requested.
-  [[ "$#" -gt 0 && ("$1" = "-h" || "$1" = "--help") ]] && { usage; return 0; }
+  [[ $# -gt 0 && ("$1" = "-h" || "$1" = "--help") ]] && { usage; return 0; }
 
-  # Verify argument count.
-  (( $#>= 0 && $#<= 1 )) || { usage; return 1; }
+  # $#>= 0 && Verify argument count.
+  (( $# < 2 )) || { usage; return 1; }
 
   # Verify dependencies.
   [[ ${_BFL_HAS_CURL} -eq 1 ]] || { bfl::error "dependency 'curl' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }

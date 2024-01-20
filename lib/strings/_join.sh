@@ -34,7 +34,7 @@
 #-----------------------------------------------------------------------------
 bfl::join() {
   # Verify arguments count.
-  (( $#>= 2 && $#<= 999 )) || { bfl::error "arguments count $# ∉ [2..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
+  (( $# > 1 && $# < 1000 )) || { bfl::error "arguments count $# ∉ [2..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   local -r glue="$1"
   shift   # Delete the first positional parameter.

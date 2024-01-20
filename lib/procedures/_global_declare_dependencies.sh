@@ -22,7 +22,7 @@
 #------------------------------------------------------------------------------
 bfl::global_declare_dependencies() {
   # Verify arguments count.
-  (( $#>= 1 && $#<= 999 )) || { bfl::error "arguments count $# ∉ [1..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
+  (( $# > 0 && $# < 1000 )) || { bfl::error "arguments count $# ∉ [1..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # grep -rnw lib/* -e 'bfl::verify_dependencies' | sed -n '/^[^:]*_verify_dependencies.sh:/!p' | sed 's/#.*$//' | sed 's/#.*$//' | sed 's/^.*bfl::verify_dependencies \([^|]*\) ||.*$/\1/' | sed 's/^.*bfl::verify_dependencies \([^\&]*\) \&\&.*$/\1/' | sed 's/^"\(.*\)"[ ]*$/\1/' | sort | uniq
 

@@ -132,6 +132,8 @@ EOF
 
   local file        # source functions
   for file in "${autoload_directory}"/lib/*/_*.sh; do
+# to debug if error:
+#   printf "file: $file\n" >> "$BASH_FUNCTIONS_LOG"
 # shellcheck disable=SC1090
       source "${file}" || bfl::die "source '${file}'"
   done
@@ -153,7 +155,7 @@ fi
 [[ "${DEBUG,,}" =~ ^1|yes|true$ ]] && set -o xtrace    # Trace the execution of the script (debug)
 
 # it's better to check dependencies at once, than dynamically check them every time bt bfl::verify_dependencies()
-bfl::global_declare_dependencies 'aws' 'brew' 'cat' 'ccache' 'chmod' 'compgen' 'curl' 'dpkg' 'find' \
+bfl::global_declare_dependencies 'sed' 'aws' 'brew' 'cat' 'ccache' 'chmod' 'compgen' 'curl' 'dpkg' 'find' \
   'getconf' 'git' 'grep' 'head' 'iconv' 'ifconfig' 'javaws' 'jq' 'ldapsearch' 'ldd' 'mkdir' 'mktemp' \
   'opensnoop' 'openssl' 'pbcopy' 'pbpaste' 'perl' 'proxychains4' 'pwgen' 'python' 'rm' 'rmdir' 'ruby' \
-  'screencapture' 'sed' 'sendmail' 'shuf' 'speedtest-cli' 'sqlite3' 'ssh' 'tail' 'tput' 'uname' 'vcsh'
+  'screencapture' 'sendmail' 'shuf' 'speedtest-cli' 'sqlite3' 'ssh' 'tail' 'tput' 'uname' 'vcsh'

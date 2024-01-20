@@ -33,7 +33,7 @@
 #------------------------------------------------------------------------------
 bfl::library_function() {
   # Verify arguments count.
-  (( $#>= 1 && $#<= 2 )) || { bfl::error "arguments count $# ∉ [1..2]."; return ${BFL_ErrCode_Not_verified_args_count}; }
+  (( $# > 0 && $# < 3 )) || { bfl::error "arguments count $# ∉ [1..2]."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify dependencies.
   bfl::verify_dependencies "printf" # TODO

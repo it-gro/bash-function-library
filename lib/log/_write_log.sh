@@ -36,7 +36,7 @@ bfl::write_log() {
   local str
 
   # Verify arguments count.
-  (( $#>= 3 && $#<= 4 )) || { # Нельзя bfl::die
+  (( $# > 2 && $# < 5 )) || { # Нельзя bfl::die
       str="arguments count $# ∉ [3..4]."
       if [[ ${BASH_LOG_LEVEL} -gt ${_BFL_LOG_LEVEL_INFORM} ]]; then
           bfl::inform "$str"

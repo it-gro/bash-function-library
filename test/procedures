@@ -8,7 +8,7 @@
 # @author  Joe Mooring
 #
 # @file
-# Performs assertion general procedures testing in this library.
+# Performs assertion general procedures testing system in this library.
 #
 # This simple testing mechanism has no provision for the construction and
 # deconstruction of unit test scaffolding.
