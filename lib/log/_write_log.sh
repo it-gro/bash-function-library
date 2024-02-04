@@ -52,18 +52,18 @@ bfl::write_log() {
       if [[ ${BASH_LOG_LEVEL} -gt ${_BFL_LOG_LEVEL_INFORM} ]]; then
           bfl::inform "$str"
         else
-          [[ $BASH_INTERACTIVE == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
+          [[ ${BASH_INTERACTIVE} == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
       fi
       return ${BFL_ErrCode_Not_verified_arg_values}
       }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_SED} -eq 1 ]] || { # Нельзя bfl::die
+  bfl::verify_dependencies 'sed' || { # Нельзя bfl::die
       str="dependency 'sed' not found!"
       if [[ ${BASH_LOG_LEVEL} -gt ${_BFL_LOG_LEVEL_INFORM} ]]; then
           bfl::inform "$str"
         else
-          [[ $BASH_INTERACTIVE == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
+          [[ ${BASH_INTERACTIVE} == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
       fi
       return ${BFL_ErrCode_Not_verified_dependency}
       }
@@ -78,7 +78,7 @@ bfl::write_log() {
         if [[ ${BASH_LOG_LEVEL} -gt ${_BFL_LOG_LEVEL_INFORM} ]]; then
             bfl::inform "$str"
           else
-            [[ $BASH_INTERACTIVE == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
+            [[ ${BASH_INTERACTIVE} == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
         fi
         return ${BFL_ErrCode_Not_verified_arg_values}
         }
@@ -88,7 +88,7 @@ bfl::write_log() {
         if [[ ${BASH_LOG_LEVEL} -gt ${_BFL_LOG_LEVEL_INFORM} ]]; then
             bfl::inform "$str"
           else
-            [[ $BASH_INTERACTIVE == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
+            [[ ${BASH_INTERACTIVE} == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
         fi
         return ${BFL_ErrCode_Not_verified_arg_values}
         }
@@ -98,7 +98,7 @@ bfl::write_log() {
         if [[ ${BASH_LOG_LEVEL} -gt ${_BFL_LOG_LEVEL_INFORM} ]]; then
             bfl::inform "$str"
           else
-            [[ $BASH_INTERACTIVE == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
+            [[ ${BASH_INTERACTIVE} == true ]] && printf "%s: %s\n" "${FUNCNAME[0]}" "$str" 2>&1
         fi
         return 1
         }

@@ -3,6 +3,7 @@ Main / [Usage](#usage) / [Libraries](#libraries) / [Functions](docs/function-lis
 ## Bash Function Library (collection of utility functions)
 
 A collection of BASH utility functions and script templates used to ease the creation of portable and hardened BASH scripts with sane defaults.<br />
+Main source bash functions repository: https://github.com/AlexeiKharchev/bash_functions_library
 I load these up in my own shell environment.<br />
 If they're useful for anyone else, then great! :)<br />
 If you see some errors or have improvements, you can discuss it within Telegram group Bash_functions_library
@@ -91,6 +92,7 @@ The following **global variables** must be set for the alert functions to work:
 | var | description | default |
 |:---:|---|:---:|
 | **`${BASH_INTERACTIVE}`** | If `false`, prints to log file but not stdout | `true` |
+| **`${BASH_CHECK_DEPENDENCIES_STATICALLY}`** | If `true`, doesn't check for tool exists every time | `true` |
 | **`$DEBUG`** | If `true`, prints `debug` level alerts to stdout | `false` |
 | **`$DRYRUN`** | If `true` does not eval commands passed to `_execute_` function | `false` |
 | **`${BASH_COLOURED}`** | Disable coloured output. If `false`, command `tput` also needs var `$TERM` | `true` |

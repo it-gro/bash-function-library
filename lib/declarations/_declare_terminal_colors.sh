@@ -32,8 +32,8 @@ unset FMT_BOLD FMT_UNDERLINE                                                  # 
 #------------------------------------------------------------------------------
 # shellcheck disable=SC2154
 bfl::declare_terminal_colors() {
-#  НЕЛЬЗЯ! В итог циклическая зависимость
-#  [[ ${_BFL_HAS_TPUT} -eq 1 ]] || { bfl::writelog_fail "${FUNCNAME[0]}: dependency 'tput' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }  # Verify dependencies.
+#  DANGER! Circular dependency
+#  bfl::verify_dependencies 'tput' || return $?
 
   local clr="${BASH_COLOURED:-true}"
   [[ "${clr,,}" =~ ^yes|true$ ]] && local -r bEnabled=true || local -r bEnabled=false

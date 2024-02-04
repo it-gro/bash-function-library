@@ -35,11 +35,11 @@ bfl::send_sms_msg() {
   bfl::is_blank "$2" && { bfl::error "The message is required."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_AWS} -eq 1 ]] || { bfl::error "dependency 'aws' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'aws' || return $?
 
-  declare -r phone_number="$1"
-  declare -r message="$2"
-  declare -r phone_number_regex="^\\+[0-9]{6,}$"
+  local -r phone_number="$1"
+  local -r message="$2"
+  local -r phone_number_regex="^\\+[0-9]{6,}$"
 
   # Make sure phone number is properly formatted.
   if ! [[ "${phone_number}" =~ ${phone_number_regex} ]]; then

@@ -58,7 +58,7 @@ main() {
   (( $# < 2 )) || { usage; return 1; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_CURL} -eq 1 ]] || { bfl::error "dependency 'curl' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'curl' || return $?
 
   # Declare positional arguments (readonly, sorted by position).
   local -r color="${1:-"white"}"

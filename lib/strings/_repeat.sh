@@ -42,9 +42,9 @@ bfl::repeat() {
   local -r n="$2"
   local -i iErr
 
-  if [[ ${_BFL_HAS_PERL} -eq 1 ]]; then
+  if bfl::verify_dependencies 'perl'; then
       perl -e "print '$str' x $n"       || { iErr=$?; bfl::error "perl -e \"print '$str' x '$n'\""; return ${iErr}; }
-  elif [[ ${_BFL_HAS_SEQ} -eq 1 ]]; then
+  elif bfl::verify_dependencies 'seq'; then
       printf "%0.s${str}" $(seq 1 "$n") || { iErr=$?; bfl::error "printf '%0.s${str}' \$(seq 1 '$n')"; return ${iErr}; }
 #     printf "%0.s-" {1..$y}     не работает
   else

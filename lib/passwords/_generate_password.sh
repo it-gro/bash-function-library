@@ -51,8 +51,7 @@ bfl::generate_password() {
     { bfl::error "'${pswd_length}' expected >= '${min_pswd_length}'."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_PWGEN} -eq 1 ]] || { bfl::error "dependency 'pwgen' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
-  [[ ${_BFL_HAS_SHUF} -eq 1 ]]  || { bfl::error "dependency 'shuf' not found";  return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'pwgen' 'shuf' || return $?
 
   # Declare positional argument (readonly).
   local -r pswd_length="$1"

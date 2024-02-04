@@ -70,7 +70,7 @@ main() {
   fi
 
   # Verify dependencies.     # TODO
-  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || { bfl::error "dependency 'printf' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'printf' || return $?
 
   # Declare positional arguments (readonly, sorted by position).
   local -r foo="$1" # TODO

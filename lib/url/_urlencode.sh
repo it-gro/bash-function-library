@@ -37,7 +37,7 @@ bfl::urlencode() {
   bfl::is_blank "$1" && { bfl::error "String is empty or blank!"; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   local Rslt
-  if [[ ${_BFL_HAS_JQ} -eq 1 ]]; then
+  if bfl::verify_dependencies 'jq'; then
       Rslt=$(jq -Rr @uri <<< "$1") || { bfl::error "jq -Rr @uri <<< '$1'"; return $?; }
   else
       local -i i=0

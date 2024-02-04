@@ -40,7 +40,7 @@ bfl::is_apache_vhost() {
   [[ $# -gt 1 ]] && bfl::is_blank "$2" && { bfl::error "path_sites_enabled argument is empty."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_GREP} -eq 1 ]] || { bfl::error "dependency 'grep' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'grep' || return $?
 
   # Declare positional arguments (readonly, sorted by position).
   local -r sites_enabled="${2:-"/etc/apache2/sites-enabled"}"

@@ -153,7 +153,7 @@ bfl::introduce() {
   bfl::is_positive_integer "$2" || { bfl::error "'$2' expected to be a positive integer."; return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_PRINTF} -eq 1 ]] || { bfl::error "dependency 'printf' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'printf' || return $?
 
   # Declare positional arguments (readonly, sorted by position).
   local -r name="$1"

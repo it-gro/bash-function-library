@@ -49,5 +49,5 @@ bfl::get_file_extension() {
   printf "%s\\n" "${file_extension}"
   }
 
-#  [[ ${_BFL_HAS_SED} -eq 1 ]] || { bfl::writelog_fail "${FUNCNAME[0]}: dependency tput not found"; return ${BFL_ErrCode_Not_verified_dependency}; }  # Verify dependencies.
+#  bfl::verify_dependencies 'sed' || return $?
 #  echo "$s" | sed 's/^.*\.\([^.]*\)$/\1/'

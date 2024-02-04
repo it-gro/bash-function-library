@@ -66,9 +66,7 @@ bfl::lorem() {
   local -r resource="${2:-muir}"
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_SED}  -eq 1 ]] || { bfl::error "dependency 'sed' not found";  return ${BFL_ErrCode_Not_verified_dependency}; }
-  [[ ${_BFL_HAS_AWK}  -eq 1 ]] || { bfl::error "dependency 'awk' not found";  return ${BFL_ErrCode_Not_verified_dependency}; }
-  [[ ${_BFL_HAS_SHUF} -eq 1 ]] || { bfl::error "dependency 'shuf' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'sed' 'awk' 'shuf' || return $?
 
   # Declare positional arguments (readonly, sorted by position).
 

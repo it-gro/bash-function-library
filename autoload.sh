@@ -154,8 +154,8 @@ fi
 # Enable xtrace if the DEBUG environment variable is set
 [[ "${DEBUG,,}" =~ ^1|yes|true$ ]] && set -o xtrace    # Trace the execution of the script (debug)
 
-# it's better to check dependencies at once, than dynamically check them every time bt bfl::verify_dependencies()
-bfl::global_declare_dependencies 'sed' 'aws' 'brew' 'cat' 'ccache' 'chmod' 'compgen' 'curl' 'dpkg' 'find' \
-  'getconf' 'git' 'grep' 'head' 'iconv' 'ifconfig' 'javaws' 'jq' 'ldapsearch' 'ldd' 'mkdir' 'mktemp' \
-  'opensnoop' 'openssl' 'pbcopy' 'pbpaste' 'perl' 'proxychains4' 'pwgen' 'python' 'rm' 'rmdir' 'ruby' \
+# it's better to check dependencies at once, than dynamically check them every time by bfl::verify_dependencies()
+bfl::declare_dependencies_statically 'sed' 'aws' 'brew' 'cat' 'ccache' 'chmod' 'compgen' 'curl' 'cut' 'diff' 'dpkg' \
+  'egrep' 'find' 'getconf' 'git' 'grep' 'head' 'iconv' 'ifconfig' 'javaws' 'jq' 'ldapsearch' 'ldd' 'mkdir' 'mktemp' \
+  'opensnoop' 'openssl' 'pbcopy' 'pbpaste' 'perl' 'proxychains4' 'pwgen' 'python' 'rm' 'rmdir' 'ruby' 'sort' \
   'screencapture' 'sendmail' 'shuf' 'speedtest-cli' 'sqlite3' 'ssh' 'tail' 'tput' 'uname' 'vcsh'

@@ -10,7 +10,7 @@
 # @author  Alexei Kharchev
 #
 # @file
-# Defines function: bfl::global_declare_dependencies().
+# Defines function: bfl::declare_dependencies_statically().
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -18,9 +18,9 @@
 #   Declare whole list dependencies
 #
 # @example
-#   bfl::global_declare_dependencies 'sed' 'grep' 'head' ...
+#   bfl::declare_dependencies_statically 'sed' 'grep' 'head' ...
 #------------------------------------------------------------------------------
-bfl::global_declare_dependencies() {
+bfl::declare_dependencies_statically() {
   # Verify arguments count.
   (( $# > 0 && $# < 1000 )) || { bfl::error "arguments count $# ∉ [1..999]"; return ${BFL_ErrCode_Not_verified_args_count}; }
 

@@ -57,7 +57,7 @@ bfl::send_mail_msg() {
   bfl::is_blank "$5" && { bfl::error "The message body is required.";             return ${BFL_ErrCode_Not_verified_arg_values}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_SENDMAIL} -eq 1 ]] || { bfl::error "dependency 'sendmail' not found."; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'sendmail' || return $?
 
   local -i iErr
   local message # Format the message.                       to  from subject body

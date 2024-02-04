@@ -31,7 +31,7 @@ bfl::transliterate() {
   [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_ICONV} -eq 1 ]] || { bfl::error "dependency 'iconv' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'iconv' || return $?
 
   # Enable extended pattern matching features.
   shopt -s extglob

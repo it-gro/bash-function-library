@@ -38,8 +38,7 @@ main() {
   [[ $# -eq 0 ]] || { usage; return 1; }
 
   # Verify dependencies.
-  [[ ${_BFL_HAS_GREP} -eq 1 ]] || { bfl::error "dependency 'grep' not found"; return ${BFL_ErrCode_Not_verified_dependency}; }
-  [[ ${_BFL_HAS_SED} -eq 1 ]]  || { bfl::error "dependency 'sed' not found";  return ${BFL_ErrCode_Not_verified_dependency}; }
+  bfl::verify_dependencies 'grep' 'sed ' || return $?
 
   # Declare readonly variables (sorted by name).
   local -r btx3="\\x60\\x60\\x60"   # 3 backticks
