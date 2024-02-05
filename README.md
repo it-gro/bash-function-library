@@ -18,7 +18,7 @@ If you see some errors or have improvements, you can discuss it within Telegram 
 ### Usage
 
 In short:<br />
-1) clone repository: `git clone git@github.com:AlexeiKharchev/bfl_JMooring "$YOUR_PATH"`<br />
+1) clone repository: `git clone git@github.com:AlexeiKharchev/bash_functions_library "$YOUR_PATH"`<br />
 2) create script to define repository locaton (in order ro source from any script):<br />
 **Contents of my `${HOME}/getConsts` :**
 ```bash
@@ -93,8 +93,9 @@ The following **global variables** must be set for the alert functions to work:
 |:---:|---|:---:|
 | **`${BASH_INTERACTIVE}`** | If `false`, prints to log file but not stdout | `true` |
 | **`${BASH_CHECK_DEPENDENCIES_STATICALLY}`** | If `true`, doesn't check for tool exists every time | `true` |
-| **`$DEBUG`** | If `true`, prints `debug` level alerts to stdout | `false` |
-| **`$DRYRUN`** | If `true` does not eval commands passed to `_execute_` function | `false` |
+| **`${DEBUG}`** | If `true`, prints `debug` level alerts to stdout | `false` |
+| **`${VERBOSE}`** | If `true` prints all debug messages to stdout | `false` |
+| **`${DRYRUN}`** | If `true` does not eval commands passed to `_execute_` function | `false` |
 | **`${BASH_COLOURED}`** | Disable coloured output. If `false`, command `tput` also needs var `$TERM` | `true` |
 | **`${BASH_FUNCTIONS_LOG}`** | Path to a log file | `"$HOME/.faults"` |
 | **`${BASH_LOG_LEVEL}`** | One of: `FATAL`, `ERROR`, `WARN`, `INFO`, `DEBUG`, `ALL`, `OFF` | `ERROR` |

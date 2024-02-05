@@ -71,6 +71,7 @@
 # protect from reloading twice
 source "${BASH_FUNCTIONS_LIBRARY%/*}"/lib/procedures/_transform_bfl_script_name.sh
 _bfl_temporary_var="$(bfl::transform_bfl_script_name ${BASH_SOURCE##*/})"
+# shellcheck disable=SC2015
 [[ ${!_bfl_temporary_var} -eq 1 ]] && return 0 || readonly "${_bfl_temporary_var}"=1
 
 # Confirm we have BASH greater than v4
