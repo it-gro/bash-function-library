@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set +u    # подключаем внешнюю "библиотеку"
+set +u    # plug in external bfl library
 [[ ${_GUARD_BFL_AUTOLOAD} -eq 1 ]] || { . /etc/getConsts || exit 1; . "${BASH_FUNCTIONS_LIBRARY}"; }
 #------------------------------------------------------------------------------
 # @file
