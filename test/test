@@ -4,329 +4,14 @@
 # @file
 # Performs assertion testing of the functions in this library.
 #
-# This simple testing mechanism has no provision for the construction and
-# deconstruction of unit test scaffolding. Consequently, I am unable to provide
-# an affirmative assertion for bfl::is_apache_vhost.
 #------------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------
-# @function
-# Declares assertions.
-#
-# Do not create any assertions for bfl::declare_ansi_escape_sequences because
-# the function declares readonly variables. Each assertion would fail due to
-# attempted assignments of readonly variables.
-#
-# @return global array $assertions
-#   This is a one dimensional array. Each element is a pipe delimited list
-#   of three values in this sequence:
-#
-#   1. Function to test (example: bfl::join)
-#   2. Parameters to pass to function (example, "1" "2" "3")
-#   3. Expected return code (example: 0)
-#------------------------------------------------------------------------------
-declare_assertions() {
-  declare -ga assertions=(
-    'bfl::die||1'
-    'bfl::die|""|1'
-    'bfl::die|" "|1'
-    'bfl::die|"foo"|1'
-    'bfl::die|"foo" "bar"|1'
-
-    'bfl::error||0'
-    'bfl::error|""|0'
-    'bfl::error|" "|0'
-    'bfl::error|"foo"|0'
-    'bfl::error|"foo" "bar"|1'
-
-    'bfl::find_nearest_integer||1'
-    'bfl::find_nearest_integer|"" "" ""|1'
-    'bfl::find_nearest_integer|"" ""|1'
-    'bfl::find_nearest_integer|" " " "|1'
-    'bfl::find_nearest_integer|"a" ""|1'
-    'bfl::find_nearest_integer|"1" ""|1'
-    'bfl::find_nearest_integer|"1" " "|1'
-    'bfl::find_nearest_integer|"1" "a e g"|1'
-    'bfl::find_nearest_integer|"1.1" "4 -1 0 1 4"|1'
-    'bfl::find_nearest_integer|"1" "4.1 -1 0 1 4"|1'
-    'bfl::find_nearest_integer|"-2" "-4 -1 0 1 4"|0'
-    'bfl::find_nearest_integer|"0" "-4 -1 0 1 4"|0'
-    'bfl::find_nearest_integer|"2" "-4 -1 0 1 4"|0'
-
-    'bfl::generate_password||1'
-    'bfl::generate_password|"" ""|1'
-    'bfl::generate_password|""|1'
-    'bfl::generate_password|" "|1'
-    'bfl::generate_password|"a"|1'
-    'bfl::generate_password|"1.1"|1'
-    'bfl::generate_password|"-1"|1'
-    'bfl::generate_password|"7"|1'
-    'bfl::generate_password|"8"|0'
-
-    'bfl::get_directory_path||1'
-    'bfl::get_directory_path|""|1'
-    'bfl::get_directory_path|" "|1'
-    'bfl::get_directory_path|"a" "b"|1'
-    'bfl::get_directory_path|"/tmp"|0'
-    'bfl::get_directory_path|"/tmp/non-existent-directory"|1'
-    'bfl::get_directory_path|"/etc/host.conf"|1'
-
-    'bfl::get_file_directory||1'
-    'bfl::get_file_directory|""|1'
-    'bfl::get_file_directory|" "|1'
-    'bfl::get_file_directory|"a" "b"|1'
-    'bfl::get_file_directory|"/tmp"|1'
-    'bfl::get_file_directory|"/tmp/non-existent-file.ext"|1'
-    'bfl::get_file_directory|"/etc/host.conf"|0'
-
-    'bfl::get_file_extension||1'
-    'bfl::get_file_extension|""|1'
-    'bfl::get_file_extension|" "|1'
-    'bfl::get_file_extension|"a" "b"|1'
-    'bfl::get_file_extension|"/tmp/non-existent-file.ext"|1'
-    'bfl::get_file_extension|"/etc/host.conf"|0'
-
-    'bfl::get_file_name_without_extension||1'
-    'bfl::get_file_name_without_extension|""|1'
-    'bfl::get_file_name_without_extension|" "|1'
-    'bfl::get_file_name_without_extension|"a" "b"|1'
-    'bfl::get_file_name_without_extension|"/tmp/non-existent-file.ext"|1'
-    'bfl::get_file_name_without_extension|"/etc/host.conf"|0'
-
-    'bfl::get_file_name||1'
-    'bfl::get_file_name|""|1'
-    'bfl::get_file_name|" "|1'
-    'bfl::get_file_name|"a" "b"|1'
-    'bfl::get_file_name|"/tmp/non-existent-file.ext"|1'
-    'bfl::get_file_name|"/etc/host.conf"|0'
-
-    'bfl::get_file_path||1'
-    'bfl::get_file_path|""|1'
-    'bfl::get_file_path|" "|1'
-    'bfl::get_file_path|"a" "b"|1'
-    'bfl::get_file_path|"/tmp/non-existent-file.ext"|1'
-    'bfl::get_file_path|"/etc/host.conf"|0'
-
-    'bfl::inform||0'
-    'bfl::inform|""|0'
-    'bfl::inform|" "|0'
-    'bfl::inform|"foo"|0'
-    'bfl::inform|"foo" "bar"|1'
-
-    'bfl::is_apache_vhost||1'
-    'bfl::is_apache_vhost|""|1'
-    'bfl::is_apache_vhost|"" ""|1'
-    'bfl::is_apache_vhost|" " " "|1'
-    'bfl::is_apache_vhost|"a" "b"|1'
-    'bfl::is_apache_vhost|"a"|1'
-    'bfl::is_apache_vhost|"a" " "|1'
-    'bfl::is_apache_vhost|"a" "b"|1'
-    'bfl::is_apache_vhost|"a" "/etc/apache2/sites-enabled"|1'
-    'bfl::is_apache_vhost|"/tmp" "b"|1'
-
-    'bfl::is_blank||1'
-    'bfl::is_blank|""|0'
-    'bfl::is_blank|" "|0'
-    'bfl::is_blank|"\t"|0'
-    'bfl::is_blank|"\n"|0'
-    'bfl::is_blank|"asd"|1'
-
-    'bfl::is_empty||1'
-    'bfl::is_empty|""|0'
-    'bfl::is_empty|" "|1'
-    'bfl::is_empty|"a"|1'
-    'bfl::is_empty|"a" "b"|1'
-    'bfl::is_empty|"" ""|1'
-
-    'bfl::is_integer||1'
-    'bfl::is_integer|""|1'
-    'bfl::is_integer|" "|1'
-    'bfl::is_integer|"foo"|1'
-    'bfl::is_integer|"1.2"|1'
-    'bfl::is_integer|"1" "2" "3"|1'
-    'bfl::is_integer|"-1"|0'
-    'bfl::is_integer|"1"|0'
-
-    'bfl::is_positive_integer||1'
-    'bfl::is_positive_integer|""|1'
-    'bfl::is_positive_integer|" "|1'
-    'bfl::is_positive_integer|"foo"|1'
-    'bfl::is_positive_integer|"1.2"|1'
-    'bfl::is_positive_integer|"1" "2" "3"|1'
-    'bfl::is_positive_integer|"-1"|1'
-    'bfl::is_positive_integer|"1"|0'
-
-    'bfl::join||1'
-    'bfl::join|","|1'
-    'bfl::join|"," "This is" "a" "test."|0'
-    'bfl::join|"," "Foo"|0'
-    'bfl::join|"" "Foo"|0'
-    'bfl::join|"" "" ""|0'
-    'bfl::join|"," ""|0'
-    'bfl::join|"," "" ""|0'
-    'bfl::join|"" ""|0'
-
-    'bfl::lorem|""|0'
-    'bfl::lorem|"0"|1'
-    'bfl::lorem|"-1"|1'
-    'bfl::lorem|"a"|1'
-    'bfl::lorem|"1" "darwin" "a"|1'
-    'bfl::lorem||0'
-    'bfl::lorem|"2"|0'
-    'bfl::lorem|"1" "burroughs" |0'
-    'bfl::lorem|"1" "darwin" |0'
-    'bfl::lorem|"1" "mills" |0'
-    'bfl::lorem|"1" "muir" |0'
-    'bfl::lorem|"1" "virgil" |0'
-    'bfl::lorem|"1" "xxx" |1'
-
-    'bfl::print_args||1'
-    'bfl::print_args|"foo"|0'
-    'bfl::print_args|""|0'
-
-    'bfl::repeat||1'
-    'bfl::repeat|"" "" ""|1'
-    'bfl::repeat|"" ""|1'
-    'bfl::repeat|"" " "|1'
-    'bfl::repeat|"" "a"|1'
-    'bfl::repeat|"" "1.1"|1'
-    'bfl::repeat|"" "-1"|1'
-    'bfl::repeat|"" "3"|0'
-    'bfl::repeat|" " "3"|0'
-    'bfl::repeat|"-" "3"|0'
-
-    'bfl::send_mail_msg||1'
-    'bfl::send_mail_msg|""|1'
-    'bfl::send_mail_msg|"" ""|1'
-    'bfl::send_mail_msg|"" "" ""|1'
-    'bfl::send_mail_msg|"" "" "" ""|1'
-    'bfl::send_mail_msg|"" "" "" "" ""|1'
-    'bfl::send_mail_msg|"" "" "" "" "" ""|1'
-    'bfl::send_mail_msg|"foo@example.com" "" "" "" ""|1'
-    'bfl::send_mail_msg|"foo@example.com" "foo@example.com" "" "" ""|1'
-    'bfl::send_mail_msg|"foo@example.com" "foo@example.com" "foo@example.com" "" ""|1'
-    'bfl::send_mail_msg|"foo@example.com" "foo@example.com" "foo@example.com" "Subject" ""|1'
-    'bfl::send_mail_msg|"foo@example.com" "foo@example.com" "foo@example.com" "Subject"|1'
-    'bfl::send_mail_msg|"foo@example.com" "foo@example.com" "foo@example.com" "Subject" "Body"|0'
-    'bfl::send_mail_msg|"Foo <foo@example.com>" "foo@example.com" "foo@example.com" "Subject" "Body"|0'
-    'bfl::send_mail_msg|"Foo <foo@example.com>" "Foo <foo@example.com>" "foo@example.com" "Subject" "Body"|0'
-
-    'bfl::send_sms_msg||1'
-    'bfl::send_sms_msg|""|1'
-    'bfl::send_sms_msg|"" ""|1'
-    'bfl::send_sms_msg|"foo"|1'
-    'bfl::send_sms_msg|"foo" ""|1'
-    'bfl::send_sms_msg|"foo" "bar"|1'
-    'bfl::send_sms_msg|"17039897379" "bar"|1'
-    'bfl::send_sms_msg|"+17039897379"|1'
-    'bfl::send_sms_msg|"+17039897379" ""|1'
-    'bfl::send_sms_msg|"+17039897379" "bar"|0'
-
-    'bfl::time_convert_s_to_hhmmss||1'
-    'bfl::time_convert_s_to_hhmmss|"" ""|1'
-    'bfl::time_convert_s_to_hhmmss|""|1'
-    'bfl::time_convert_s_to_hhmmss|" "|1'
-    'bfl::time_convert_s_to_hhmmss|"a"|1'
-    'bfl::time_convert_s_to_hhmmss|"1.1"|1'
-    'bfl::time_convert_s_to_hhmmss|"-1"|1'
-    'bfl::time_convert_s_to_hhmmss|"1"|0'
-    'bfl::time_convert_s_to_hhmmss|"61"|0'
-    'bfl::time_convert_s_to_hhmmss|"3661"|0'
-
-    'bfl::transliterate||1'
-    'bfl::transliterate|"This is A string." "So is this."|1'
-    'bfl::transliterate|""|0'
-    'bfl::transliterate|"This is A string."|0'
-
-    'bfl::trim||1'
-    'bfl::trim|""|0'
-    'bfl::trim|"abc"|0'
-    'bfl::trim|"   def"|0'
-    'bfl::trim|"ghi   "|0'
-    'bfl::trim|"   jkl   "|0'
-    'bfl::trim|"   mno   pqr   stu   "|0'
-
-    'bfl::urlencode||1'
-    'bfl::urlencode|""|1'
-    'bfl::urlencode|"" ""|1'
-    'bfl::urlencode|"a" "b"|1'
-    'bfl::urlencode|"foo bar"|0'
-
-    'bfl::verify_arg_count||1'
-    'bfl::verify_arg_count|"7"|1'
-    'bfl::verify_arg_count|"4" "5" "6"|1'
-    'bfl::verify_arg_count|"a" "8" "9"|1'
-    'bfl::verify_arg_count|"7" "b" "9"|1'
-    'bfl::verify_arg_count|"7" "8" "c"|1'
-    'bfl::verify_arg_count|"2" "1" "3"|0'
-
-    'bfl::verify_dependencies||1'
-    'bfl::verify_dependencies|"rm" "sort" "cough"|1'
-    'bfl::verify_dependencies|"rm" "ls" "whoami"|0'
-
-    'bfl::warn||0'
-    'bfl::warn|""|0'
-    'bfl::warn|" "|0'
-    'bfl::warn|"foo"|0'
-    'bfl::warn|"foo" "bar"|1'
-  )
-}
+set +u    # подключаем внешнюю "библиотеку"
+[[ ${_GUARD_BFL_AUTOLOAD} -eq 1 ]] || { . /etc/getConsts || exit 1; . "${BASH_FUNCTIONS_LIBRARY}"; }
 
 #------------------------------------------------------------------------------
 # @function
-# Tests a function to see if its return code matches the expected return code.
-#
-# @param string $function_to_test
-#   The function to be tested.
-# @param string $args
-#   The arguments to pass to the function.
-# @param string $expected_return_code
-#   The expected return code (0 or 1).
-#
-# shellcheck disable=SC2059
-# shellcheck disable=SC2154
-#------------------------------------------------------------------------------
-assert() {
-  bfl::verify_arg_count "$#" 3 3 || exit 1
-
-  declare -r function_to_test="$1"
-  declare -r args="$2"
-  declare -r expected_return_code="$3"
-  declare actual_return_code
-  declare cmd
-  declare cmd_output
-  declare format
-  declare result
-
-  # Test for empty strings.
-  if bfl::is_empty "${function_to_test}"; then
-    bfl::die "\$function_to_test is a an empty string."
-  fi
-  if bfl::is_empty "${expected_return_code}"; then
-    bfl::die "\$expected_return_code is a an empty string."
-  fi
-
-  # Run the command. The command is run in a subshell (command substitution);
-  # exit calls will terminate the subshell, not this script.
-  cmd=$(printf "%s %s" "${function_to_test}" "${args}")
-  cmd_output=$(eval "${cmd}" 2>&1)
-  actual_return_code="$?"
-
-  # Print results.
-  if [[ "${actual_return_code}" -eq "${expected_return_code}" ]]; then
-    result="PASS"
-    format="${bfl_aes_green}%-${cw1}s${bfl_aes_reset} %-${cw2}s %-${cw3}s %-${cw4}s %-${cw5}s %-${cw6}s${bfl_aes_reset} \\n"
-  else
-    result="FAIL"
-    format="${bfl_aes_red}%-${cw1}s${bfl_aes_reset} %-${cw2}s %-${cw3}s %-${cw4}s %-${cw5}s %-${cw6}s${bfl_aes_reset} \\n"
-  fi
-  cmd_output=${cmd_output//[$'\n']}
-  printf "${format}" "${result}" "${function_to_test:0:${cw2}}" "${args:0:${cw3}}" "${expected_return_code}" "${actual_return_code}" "${cmd_output:0:${cw6}}"
-}
-
-#------------------------------------------------------------------------------
-# @function
-# Main function.
+#   Main function.
 #
 # @param array global $assertions
 #   Global array created by declare_assertions().
@@ -336,60 +21,160 @@ assert() {
 # shellcheck disable=SC2059
 #------------------------------------------------------------------------------
 main() {
-  if ! source "${BASH_FUNCTION_LIBRARY}"; then
-    printf "Error. Unable to source BASH_FUNCTION_LIBRARY.\\n" 1>&2
-    exit 1
-  fi
-
-  # Declare assertions.
-  declare_assertions
+  # Verify arguments count.
+  (( $# < 2 )) || { bfl::error "arguments count $# ∉ [0..1]."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
   # Declare column widths (global constants) for displaying test results.
-  declare -rg cw1=6     # Width of column 1: Result (PASS/FAIL)
-  declare -rg cw2=37    # Width of column 2: Function
-  declare -rg cw3=33    # Width of column 3: Arguments
-  declare -rg cw4=8     # Width of column 4: Expected return code
-  declare -rg cw5=6     # Width of column 5: Actual return code
-  declare -rg cw6=109   # Width of column 6: Command output
+  local -ri cw1=6     # Width of column 1: Result (PASS/FAIL)
+  local -i  cw2=0     # Width of column 2: Function                 CAN BE CHANGED!
+  local -ri cw3=34    # Width of column 3: Arguments
+  local -i  cw4=2     # Width of column 4: Expected return code     CAN BE CHANGED!
+  #local -ri cw5=2     # Width of column 5: Actual return code
+  #local -ri cw6=80    # Width of column 6: Expected command output
+  local -i cw7=80     # Width of column 7: Actual command output    CAN BE CHANGED!
 
-  # Declare other local variables.
-  declare assertion
-  declare -r format="%-${cw1}s %-${cw2}s %-${cw3}s %-${cw4}s %-${cw5}s %-${cw6}s"
-  declare line_1 line_2 line_3 line_4 line_5 line_6
-  declare -a pieces
+#   Tests a function to see if its return code matches the expected return code.
+# $function_to_test $args $expected_return_code (optional $expected_return_value)
+# shellcheck disable=SC2059
+# shellcheck disable=SC2154
+  assert() {
+    # Verify arguments count.
+    (( $# > 2 && $# < 5 )) || { bfl::error "arguments count $# ∉ [3..4]."; return ${BFL_ErrCode_Not_verified_args_count}; }
 
-  # Create table header lines for for displaying test results.
-  line_1=$(bfl::repeat "=" ${cw1})
-  line_2=$(bfl::repeat "=" ${cw2})
-  line_3=$(bfl::repeat "=" ${cw3})
-  line_4=$(bfl::repeat "=" ${cw4})
-  line_5=$(bfl::repeat "=" ${cw5})
-  line_6=$(bfl::repeat "=" ${cw6})
+    # Test for empty strings.
+    bfl::is_blank "$1" && { bfl::error "\$function_to_test is required."; return 1; }
+    bfl::is_blank "$3" && { bfl::error "\$expected_return_code is required."; return 1; }
+    local s3; [[ "$3" -lt 10 ]] && s3=' '  # expected_return_code
 
-  # Clear the screen.
-  clear
+    local {s,s2,cmd,cmd_output,format,result}=
+    local {wrong_code,wrong_value}=false
+    local -i iErr
 
-  # Print initial newline.
-  printf "\\n"
+    # Run the command. The command is run in a subshell (command substitution);
+    # exit calls will terminate the subshell, not this script.
+    cmd=$(printf "%s %s" "$1" "$2")
+    cmd_output=$(eval "${cmd}" 2>&1)
+    iErr=$? # Immediately
+    [[ -z "$4" ]] && [[ -z "${cmd_output}" ]] && s2="" || s2=" | "
 
-  # Print table header.
-  printf "${format}\\n" "" "" "" "Expected" "Actual" ""
-  printf "${format}\\n" "" "" "" "Return" "Return" ""
-  printf "${format}\\n" "Result" "Function" "Arguments (truncated)" "Code" "Code" "First line of command output (truncated)"
-  printf "%s %s %s %s %s %s\\n" "${line_1}" "${line_2}" "${line_3}" "${line_4}" "${line_5}" "${line_6}"
+    #   expected_return_code
+    [[ ${iErr} -eq "$3" ]] || { wrong_code=true; result="FAIL"; }
+    #                         expected_value
+    (( $# > 3 )) && [[ "${cmd_output}" != "$4" ]] && { wrong_value=true; result="FAIL"; }
 
-  # Run assertion tests.
-  for assertion in "${assertions[@]}"; do
-    IFS="|" read -r -a pieces <<< "${assertion}"
-    # ${pieces[0]} is the function to be called
-    # ${pieces[1]} is the arguments string
-    # ${pieces[2]} is the expected return code
-    assert "${pieces[0]}" "${pieces[1]}" "${pieces[2]}" || true
+    # Print results.
+    if [[ $result = "FAIL" ]]; then
+        ${wrong_code} && s="${bfl_aes_red_blink}%-${cw4}s${bfl_aes_reset}" || s="%-${cw4}s"
+        ${wrong_value} && s="$s %s${s2}${bfl_aes_red_blink}" || s="$s %s${s2}"
+        format="${bfl_aes_red_bold}%-${cw1}s${bfl_aes_reset} %-${cw2}s %-${cw3}s %-${cw4}s / $s%s${bfl_aes_reset} \\n"
+    else
+        result="PASS"
+        format="${bfl_aes_green_bold}%-${cw1}s${bfl_aes_reset} %-${cw2}s %-${cw3}s %-${cw4}s / %-${cw4}s %s${s2}%s${bfl_aes_reset} \\n"
+    fi
+
+    local -r function_to_test="$1"
+    local -r args="$2"                #                                              expected / actual       expected / actual
+    cmd_output=${cmd_output//[$'\n']} #                                                 return_code      return value
+    printf "${format}" "${result}" "${function_to_test:0:${cw2}}" "${args:0:${cw3}}" "${s3}$3" "${iErr}" "$4" "${cmd_output:0:${cw7}}" 2>&1
+    }
+
+  test_file() {
+    # Verify arguments count.
+    [[ $# -eq 1 ]] || { bfl::error "arguments count $# ≠ 1."; return ${BFL_ErrCode_Not_verified_args_count}; }
+
+    # Test for empty strings.
+    bfl::is_blank "$1" && { bfl::error "\$test file is required.";        return 1; }
+    [[ -f "$1" ]] && local -r f="$1" || local -r f="${BASH_FUNCTIONS_LIBRARY%/*}"/test/"$1"
+    [[ -f "$f" ]]      || { bfl::error "\$test file '$1' doesn't exist."; return 1; }
+
+    local -i {iErr,i}=0
+
+    source "$f"
+    declare_assertions # Declare assertions.
+
+    local {assertion,s}= # Updating Function column width
+    for assertion in "${assertions[@]}"; do
+        s=$(echo "${assertion}" | sed 's/^[a-zA-Z0-9:_]*\(.\).*$/\1/')
+        IFS="$s" read -r -a pieces <<< "${assertion}"
+        if (( ${#pieces[@]} > 0 )); then
+            s="${pieces[0]}"; i=${#s}
+            ((i > cw2)) && cw2=i
+            s="${pieces[2]}"; i=${#s}
+            ((i > cw4)) && cw4=i
+        fi
+    done
+
+  # columns width:   Result Function Arguments  returncode    output
+  # readonly cw_arr=(   6      37        33       8     6      109 )
+  #                 PASS/FAIL                 Expected Actual
+
+    # Declare other local variables.
+    local -r format="%-${cw1}s %-${cw2}s %-${cw3}s %-"$((2*cw4 + 3))"s %-${cw7}s"
+    local {line_1,line_2,line_3,line_4,line_7,s2,s3,s4,s7}=
+    local -a pieces
+    local -i i=0
+
+    # Create table header lines for for displaying test results.
+    line_1=$(bfl::repeat "=" ${cw1})
+    line_2=$(bfl::repeat "=" ${cw2})
+    line_3=$(bfl::repeat "=" ${cw3})
+    line_4=$(bfl::repeat "=" $((2*cw4 + 3)) )
+  #  line_5=$(bfl::repeat "=" ${cw5})
+  #  line_6=$(bfl::repeat "=" ${cw6})
+    line_7=$(bfl::repeat "=" ${cw7})
+    ((cw2 > 8)) && s2=$(bfl::repeat " " $((cw2/2 - 4)) )
+    s3=$(bfl::repeat " " $((cw3/2 - 11)) )
+    s4=$(bfl::repeat " " $(( cw4 - 2 + 3/2)) )
+    s7=$(bfl::repeat " " $((cw7/2 - 20)) )
+
+    # Print table header.
+    printf "%-${cw1}s %-${cw2}s %-$(( cw3 - 6))s %-${cw4}s %-${cw7}s\\n" "" "" "" "Expected / Actual" ""
+    printf "${format}\\n" "Result" "${s2}Function" "${s3}Arguments (truncated)" "${s4}Code" "${s7}First line of command output (truncated)"
+    printf "%s %s %s %s %s %s\\n" "${line_1}" "${line_2}" "${line_3}" "${line_4}" "${line_7}" #  "${line_5}" "${line_6}"
+
+    printf "\n" 2>&1
+    printf "${bfl_aes_yellow_bold}Testing %s library...${bfl_aes_reset}\n" "$f" 2>&1
+    printf "\n" 2>&1
+
+    for assertion in "${assertions[@]}"; do
+        s=$(echo "${assertion}" | sed 's/^[a-zA-Z0-9:_]*\(.\).*$/\1/')
+        IFS="$s" read -r -a pieces <<< "${assertion}"
+        i=${#pieces[@]}
+        if [[ $i -eq 3 ]]; then
+            # called function        arguments    return code
+            assert "${pieces[0]}" "${pieces[1]}" "${pieces[2]}" || iErr=$?
+        elif [[ $i -eq 4 ]]; then
+            # called function        arguments    return code  expected result
+            assert "${pieces[0]}" "${pieces[1]}" "${pieces[2]}" "${pieces[3]}" || iErr=$?
+        else # error
+            iErr=1
+        fi
+    done
+
+    return ${iErr}
+    }
+
+  clear  # Clear the screen.
+  printf "\\n"  # Print initial newline.
+
+  if [[ $# -eq 1 ]]; then
+      test_file "$1"
+      iErr=$?
+      printf "\\n"
+      return ${iErr}
+  fi
+  # else
+  local d
+  for d in "${BASH_FUNCTIONS_LIBRARY%/*}"/lib/*; do
+      d="${d##*/}"
+      if [[ -f "${BASH_FUNCTIONS_LIBRARY%/*}"/test/"$d" ]]; then  #  && ! [[ "$d" = 'test' ]]
+        test_file "$d"
+      fi
   done
 
   # Print final newline.
   printf "\\n"
-}
+  }
 
-set -euo pipefail
-main
+#set -euo pipefail
+main "$@"
